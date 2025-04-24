@@ -1,0 +1,12 @@
+;	STMicroelectronics Workspace file
+
+[Version]
+Keyword=ST7Workspace-V0.7
+
+[Project0]
+Filename=kodovy_zamek.stp
+Dependencies=
+[Options]
+ActiveProject=kodovy_zamek
+ActiveConfig=Debug
+AddSortedElements=1
