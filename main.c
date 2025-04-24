@@ -42,7 +42,7 @@ const uint8_t digitToSegment[] = {
     0x7D, // 6
     0x07, // 7
     0x7F, // 8
-    0x6F  
+    0x6F  // 9
 };
 
 void setDIO(uint8_t state) {
