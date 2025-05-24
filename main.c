@@ -1,8 +1,16 @@
 #include "stm8s.h"
-#include "string.h"
+#include "milis.h"
+
+// Adresa EEPROM, kde bude uložen PIN (4 bajty)
+#define EEPROM_PIN_ADDR 0x4000
+
+// Výchozí PIN - pøi prvním spuštìní nebo pokud v EEPROM není uložen správný PIN
+const char defaultPIN[4] = {'1', '2', '3', '4'};
+
+char storedPIN[4];   // PIN naètený z EEPROM
 
 
-// --- Funkce pro ovládání TM1637 ---
+// --- TM1637 ---
 void setDIO(uint8_t state);
 void setCLK(uint8_t state);
 void tm_start(void);
@@ -10,28 +18,18 @@ void tm_stop(void);
 void tm_writeByte(uint8_t b);
 void tm_displayCharacter(uint8_t pos, uint8_t character);
 void delay_us(uint16_t microseconds);
-void playTone(uint16_t frequency, uint16_t duration_ms);
-void debugEEPROM();
 
-
-
-
-// --- Deklarace pro klávesnici ---
+// --- Klávesnice ---
 void initKeypad(void);
 char getKey(void);
 
-// --- KONTROLA KÓDU ---
-char savedCode[5] = {'1', '2', '3', '4', '\0'}; // Výchozí kód
-uint8_t isLoggedIn = 0;
-uint8_t changingCode = 0;
+// --- Bzuèák ---
+void buzzerInit(void);
+void beepSuccess(void);
+void beepFail(void);
+void beepTone(uint16_t freq, uint16_t duration_ms);
 
-// --- EEPROM funkce ---
-void EEPROM_WriteByte(uint8_t address, uint8_t data);
-uint8_t EEPROM_ReadByte(uint8_t address);
-void saveCodeToEEPROM(char *code);
-void loadCodeFromEEPROM(char *code);
-
-// --- Segmentový kód pro èíslice ---
+// --- Segmentový kód ---
 const uint8_t digitToSegment[] = {
     0x3F, // 0
     0x06, // 1
@@ -44,8 +42,6 @@ const uint8_t digitToSegment[] = {
     0x7F, // 8
     0x6F  // 9
 };
-
-
 // --- PINY TM1637 ---
 #define TM_CLK_PORT  GPIOB
 #define TM_CLK_PIN   GPIO_PIN_5
@@ -62,8 +58,15 @@ const uint8_t digitToSegment[] = {
 #define COL2_PIN GPIO_PIN_2  // PC2
 #define COL3_PIN GPIO_PIN_3  // PC3
 
+// --- Bzuèák na PD3 ---
+#define BUZZER_PORT GPIOD
+#define BUZZER_PIN  GPIO_PIN_3
 
-// Funkce pro nastavení DIO a CLK
+
+
+
+
+
 void setDIO(uint8_t state) {
     if (state) GPIO_WriteHigh(TM_DIO_PORT, TM_DIO_PIN);
     else GPIO_WriteLow(TM_DIO_PORT, TM_DIO_PIN);
@@ -111,7 +114,7 @@ void tm_writeByte(uint8_t b) {
     setCLK(1);
     delay_us(5);
     setCLK(0);
-    GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST); // back to output
+    GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST); // output
 }
 
 void tm_displayCharacter(uint8_t pos, uint8_t character) {
@@ -125,7 +128,7 @@ void tm_displayCharacter(uint8_t pos, uint8_t character) {
     tm_stop();
 
     tm_start();
-    tm_writeByte(0x88); // display ON, brightness = medium
+    tm_writeByte(0x88); // display ON, brightness medium
     tm_stop();
 }
 
@@ -174,10 +177,8 @@ char getKey(void) {
             case 3: GPIOC->ODR &= ~ROW4_PIN; break;
         }
 
-        // Krátké zpoždìní pro stabilizaci
-        for (i = 0; i < 1000; i++);
+        for (i = 0; i < 1000; i++); // malé zpoždìní
 
-        // Kontrola sloupcù
         for (col = 0; col < 3; col++) {
             uint8_t colState = 1;
 
@@ -188,10 +189,9 @@ char getKey(void) {
             }
 
             if (colState) {
-                // Zpoždìní pro debounce
-                for (i = 0; i < 30000; i++);
+                for (i = 0; i < 30000; i++); // debounce
 
-                // Znovu ovìøit, jestli je klávesa stále stisknutá
+                // potvrzení klávesy
                 switch (col) {
                     case 0: colState = !(GPIOG->IDR & COL1_PIN); break;
                     case 1: colState = !(GPIOC->IDR & COL2_PIN); break;
@@ -201,17 +201,18 @@ char getKey(void) {
                 if (colState) {
                     key = keyMap[row][col];
 
-                    // Poèkej na uvolnìní
+                    // èekání na uvolnìní klávesy
                     while (1) {
+                        uint8_t released = 0;
                         switch (col) {
-                            case 0: if (GPIOG->IDR & COL1_PIN) break;
-                            case 1: if (GPIOC->IDR & COL2_PIN) break;
-                            case 2: if (GPIOC->IDR & COL3_PIN) break;
+                            case 0: released = (GPIOG->IDR & COL1_PIN) != 0; break;
+                            case 1: released = (GPIOC->IDR & COL2_PIN) != 0; break;
+                            case 2: released = (GPIOC->IDR & COL3_PIN) != 0; break;
                         }
-                        break;
+                        if (released) break;
                     }
 
-                    // Obnovit øádek zpìt na HIGH
+                    // Obnovit øádek na HIGH
                     switch (row) {
                         case 0: GPIOD->ODR |= ROW1_PIN; break;
                         case 1: GPIOD->ODR |= ROW2_PIN; break;
@@ -224,7 +225,7 @@ char getKey(void) {
             }
         }
 
-        // Obnovit aktuální øádek na HIGH
+        // Obnovit øádek na HIGH
         switch (row) {
             case 0: GPIOD->ODR |= ROW1_PIN; break;
             case 1: GPIOD->ODR |= ROW2_PIN; break;
@@ -233,172 +234,247 @@ char getKey(void) {
         }
     }
 
-    return 0; // Žádná klávesa
+    return 0; // žádná klávesa
 }
 
-void playTone(uint16_t frequency, uint16_t duration_ms) {
-    uint32_t delay = 1000000UL / (frequency * 2); // poloèas periody (us)
-    uint32_t cycles = (uint32_t)frequency * duration_ms / 1000;
-		uint32_t i;
+
+// --- Bzuèák ---
+void buzzerInit(void) {
+    // nastavit PD3 jako výstup (push-pull)
+    GPIO_Init(BUZZER_PORT, BUZZER_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+    GPIO_WriteLow(BUZZER_PORT, BUZZER_PIN);
+}
+
+void beepTone(uint16_t freq, uint16_t duration_ms) {
+	uint32_t i;
+	
+    // jednoduché pípnutí pomocí delay a togglování pinu
+    uint32_t delay = 1000000 / (freq * 2); // poloviny periody v us
+    uint32_t cycles = (uint32_t)freq * duration_ms / 1000;
 
     for (i = 0; i < cycles; i++) {
-        GPIO_WriteHigh(GPIOD, GPIO_PIN_3); // napø. PD3
+        GPIO_WriteHigh(BUZZER_PORT, BUZZER_PIN);
         delay_us(delay);
-        GPIO_WriteLow(GPIOD, GPIO_PIN_3);
+        GPIO_WriteLow(BUZZER_PORT, BUZZER_PIN);
         delay_us(delay);
     }
 }
 
-// --- EEPROM implementace ---
-void EEPROM_WriteByte(uint8_t address, uint8_t data) {
-    while ((FLASH->IAPSR & FLASH_IAPSR_DUL) == 0); // Èekej na odemèení
-    *(PointerAttr uint8_t *)(uint16_t)(FLASH_DATA_START_PHYSICAL_ADDRESS + address) = data;
-    FLASH->IAPSR &= (uint8_t)(~FLASH_IAPSR_EOP); // Potvrï zápis
+void beepSuccess(void) {
+    beepTone(1000, 100);
 }
 
-uint8_t EEPROM_ReadByte(uint8_t address) {
-    return *(PointerAttr uint8_t *)(uint16_t)(FLASH_DATA_START_PHYSICAL_ADDRESS + address);
+void beepFail(void) {
+    beepTone(500, 100);
+    delay_us(100000);
+    beepTone(500, 100);
 }
 
-void saveCodeToEEPROM(char *code) {
-		uint8_t i;
-    for ( i = 0; i < 4; i++) {
-        EEPROM_WriteByte(0xA0 + i, code[i]);
-        playTone(1000 + (code[i] - '0') * 100, 100); // Indikace zápisu
+// --- Funkce pro EEPROM ---
+uint8_t EEPROM_ReadByte(uint16_t addr) {
+    // Ètení bajtu z EEPROM
+    return *((uint8_t*)addr);
+}
+
+
+void EEPROM_WriteByte(uint16_t addr, uint8_t data) {
+    // Povolení zápisu do EEPROM
+    FLASH_Unlock(FLASH_MEMTYPE_DATA);
+    FLASH_ProgramByte(addr, data);
+    FLASH_Lock(FLASH_MEMTYPE_DATA);
+}
+
+// --- Naètení PIN z EEPROM nebo nastavení defaultního ---
+void loadPINfromEEPROM(void) {
+    uint8_t i;
+    uint8_t valid = 1;
+    for (i = 0; i < 4; i++) {
+        storedPIN[i] = EEPROM_ReadByte(EEPROM_PIN_ADDR + i);
+        // Kontrola, že v EEPROM je èíslo '0' až '9'
+        if (storedPIN[i] < '0' || storedPIN[i] > '9') {
+            valid = 0;
+        }
     }
-}
-
-void loadCodeFromEEPROM(char *code) {
-	uint8_t i;
-    for ( i = 0; i < 4; i++) {
-        code[i] = EEPROM_ReadByte(0xA0 + i); // Naèti hodnotu z EEPROM
-    }
-    code[4] = '\0'; // Ukonèi øetìzec
-}
-
-void debugEEPROM(void) {
-		uint8_t i;
-		uint8_t k;
-
-    char debugCode[5];
-    loadCodeFromEEPROM(debugCode);
-    // Debug: pøehraj tón podle obsahu EEPROM
-		for ( i = 0; i < 4; i++) {
-				playTone(500 + ((debugCode[i] - '0') * 200), 100);
-				delay_us(200000); // Pauza mezi tóny
-		}
-
-    if (strlen(debugCode) == 4 && debugCode[0] >= '0' && debugCode[0] <= '9') {
-        // EEPROM obsahuje platný kód
-        playTone(2000, 300); // Jeden dlouhý tón
-    } else {
-        // EEPROM obsahuje neplatná data
-        for (k = 0; i < 3; i++) {
-            playTone(1000, 150); // Tøi krátké tóny
-            delay_us(150000);   // Pauza mezi tóny
+    if (!valid) {
+        // EEPROM neobsahuje validní PIN, uložíme defaultní
+        for (i = 0; i < 4; i++) {
+            storedPIN[i] = defaultPIN[i];
+            EEPROM_WriteByte(EEPROM_PIN_ADDR + i, defaultPIN[i]);
         }
     }
 }
 
+// --- Uložení PIN do EEPROM ---
+void savePINtoEEPROM(const char* newPIN) {
+    uint8_t i;
+    for (i = 0; i < 4; i++) {
+        storedPIN[i] = newPIN[i];
+        EEPROM_WriteByte(EEPROM_PIN_ADDR + i, newPIN[i]);
+    }
+}
+
+// --- Porovnání dvou PINù ---
+uint8_t comparePIN(const char* a, const char* b) {
+    uint8_t i;
+    for (i = 0; i < 4; i++) {
+        if (a[i] != b[i]) return 0;
+    }
+    return 1;
+}
+
+
+void blinkDisplay(uint8_t times) {
+    uint8_t i, j;
+    for (i = 0; i < times; i++) {
+        // Zapnout vše (všechny 4 pozice na '8')
+        for (j = 0; j < 4; j++) {
+            tm_displayCharacter(j, 0x7F); // 0x7F = všechny segmenty ON
+        }
+        delay_us(300000);  // ~300 ms (potøebuješ delší delay, mùžeš upravit)
+        
+        // Vypnout vše (všechny 4 pozice prázdné)
+        for (j = 0; j < 4; j++) {
+            tm_displayCharacter(j, 0x00);
+        }
+        delay_us(300000);
+    }
+}
+
+
+// --- factory reset ---
+void factoryResetPIN(void) {
+    savePINtoEEPROM(defaultPIN);
+    beepSuccess();
+    blinkDisplay(2); // blikni 2x po resetu
+}
 
 
 void main(void) {
     char key = 0;
-    char userInput[5] = {' ', ' ', ' ', ' ', '\0'};
+    char userInput[4] = {' ', ' ', ' ', ' '};
     uint8_t index = 0;
-    uint8_t i;
-		uint8_t l;
+    uint8_t i, j, k;
+    uint8_t loggedIn = 0;
+    uint32_t loginStartTime = 0;
+    const uint32_t LOGIN_TIMEOUT_MS = 5000;
 
-    // Inicializace hodinového systému
     CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
 
-    // Inicializace displeje a klávesnice
-    GPIO_Init(GPIOB, GPIO_PIN_5, GPIO_MODE_OUT_PP_LOW_FAST);
-    GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_OUT_PP_LOW_FAST);
-    GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_OUT_PP_LOW_FAST); // Výstup pro zvuk
+    GPIO_Init(TM_CLK_PORT, TM_CLK_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+    GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+    GPIO_Init(GPIOE, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
+
     initKeypad();
+    buzzerInit();
+    init_milis();
 
-		// Naètení kódu z EEPROM
-		loadCodeFromEEPROM(savedCode);
-		
+    for (i = 0; i < 4; i++) {
+        tm_displayCharacter(i, 0x00);
+    }
 
-		for (i = 0; i < 4; i++) {
-				if (savedCode[i] >= '0' && savedCode[i] <= '9') {
-						playTone(1000 + (savedCode[i] - '0') * 100, 100); // Pøehraj hodnoty
-				} else {
-						playTone(500, 300); // Tón pro chybnou hodnotu
-				}
-				delay_us(200000);
-		}
-		
-		// Kontrola platnosti kódu
-		if (strlen(savedCode) != 4) {
-				playTone(500, 300); // Tón pro neplatnou délku
-		} else if (savedCode[0] < '0' || savedCode[0] > '9') {
-				playTone(700, 300); // Tón pro neplatný první znak
-		}
-				
-		if (strlen(savedCode) != 4 || savedCode[0] < '0' || savedCode[0] > '9') {
-				playTone(500, 300); // Tón pro neplatnou délku
-				strcpy(savedCode, "1234"); // Nastav výchozí kód
-				saveCodeToEEPROM(savedCode); // Ulož výchozí kód do EEPROM
-				playTone(1500, 300); // Indikace inicializace
-		} else {
-				playTone(2000, 300); // Tón pro správná data
-		}
-
+    loadPINfromEEPROM();
 
     while (1) {
         key = getKey();
 
-        // Pokud je stisknuta klávesa a není plné zadání
-        if (key >= '0' && key <= '9' && index < 4) {
-            userInput[index++] = key;
-            playTone(2000, 100);
-        }
-        // Pokud je stisknuto tlaèítko zmìny kódu (#)
-        else if (key == '#' && isLoggedIn) {
-            changingCode = 1;
-            index = 0; // Resetuj index
-            playTone(1500, 200);
-        }
-
-        // Zobraz aktuální vstup na displeji
-        for (i = 0; i < 4; i++) {
-            if (userInput[i] >= '0' && userInput[i] <= '9') {
-                tm_displayCharacter(i, digitToSegment[userInput[i] - '0']);
-            } else {
-                tm_displayCharacter(i, 0x00); // Vypni segment, pokud není zadáno èíslo
-            }
-        }
-
-        // Pokud je zadáno 4 èíslic
-        if (index == 4) {
-            userInput[4] = '\0'; // Ukonèi vstup jako øetìzec
-
-            if (changingCode) {
-                // Ulož nový kód
-                strcpy(savedCode, userInput);
-                saveCodeToEEPROM(savedCode);
-                changingCode = 0;
-                playTone(1800, 300);
-            } else if (strcmp(savedCode, userInput) == 0) {
-                // Úspìšné pøihlášení
-                isLoggedIn = 1;
-                playTone(1500, 400);
-            } else {
-                // Neúspìšné pøihlášení
-                playTone(300, 700);
-            }
-
-            // Reset vstupu
+        // Tlaèítko factory reset
+        if (GPIO_ReadInputPin(GPIOE, GPIO_PIN_4) == RESET) {
+            factoryResetPIN();
+            while (GPIO_ReadInputPin(GPIOE, GPIO_PIN_4) == RESET);
             index = 0;
             for (i = 0; i < 4; i++) {
                 userInput[i] = ' ';
+                tm_displayCharacter(i, 0x00);
+            }
+            loggedIn = 0;
+        }
+
+        // Timeout automatického odhlášení
+        if (loggedIn) {
+            uint32_t now = milis();
+            if ((now - loginStartTime) >= LOGIN_TIMEOUT_MS) {
+                // Odhlášení
+                beepTone(1000, 500);  // dlouhý tón 500ms
+                for (k = 0; k < 2; k++) {
+                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0xFF);
+                    delay_ms(200);
+                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
+                    delay_ms(200);
+                }
+                loggedIn = 0;
+                index = 0;
+                for (i = 0; i < 4; i++) {
+                    userInput[i] = ' ';
+                    tm_displayCharacter(i, 0x00);
+                }
+            }
+        }
+
+        if (key != 0) {
+            if (key >= '0' && key <= '9') {
+                if (index < 4) {
+                    userInput[index] = key;
+                    tm_displayCharacter(index, digitToSegment[key - '0']);
+                    index++;
+
+                    if (index == 4) {
+                        // Po zadání 4 èíslic zkontroluj PIN (pokud není pøihlášen)
+                        if (!loggedIn) {
+                            if (comparePIN(userInput, storedPIN)) {
+                                beepSuccess();
+                                for (k = 0; k < 2; k++) {
+                                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x7F);
+                                    delay_ms(200);
+                                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
+                                    delay_ms(200);
+                                }
+                                loggedIn = 1;
+                                loginStartTime = milis();
+                            } else {
+                                beepFail();
+                            }
+                            // Vymazání vstupu vždy po kontrole
+                            index = 0;
+                            for (j = 0; j < 4; j++) {
+                                userInput[j] = ' ';
+                                tm_displayCharacter(j, 0x00);
+                            }
+                        }
+                    }
+                }
+            } else if (key == '*') {
+                // Mazání poslední èíslice
+                if (index > 0) {
+                    index--;
+                    userInput[index] = ' ';
+                    tm_displayCharacter(index, 0x00);
+                }
+            } else if (key == '#') {
+                // Pokud je pøihlášený a zadá 4 èíslice, mùže zmìnit PIN
+                if (loggedIn && index == 4) {
+                    savePINtoEEPROM(userInput);
+                    beepSuccess();
+                    blinkDisplay(2);  // blikni displej 2x
+
+                    // Aktualizovat uložený PIN v RAM
+                    for (j = 0; j < 4; j++) {
+                        storedPIN[j] = userInput[j];
+                    }
+
+                    // Ihned odhlásit uživatele po zmìnì PINu
+                    loggedIn = 0;
+                    index = 0;
+                    for (j = 0; j < 4; j++) {
+                        userInput[j] = ' ';
+                        tm_displayCharacter(j, 0x00);
+                    }
+                }
             }
         }
     }
 }
+
+
 
 
 // Debug podpora (volitelné)
