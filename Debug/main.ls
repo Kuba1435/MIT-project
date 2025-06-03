@@ -18,10 +18,10 @@
   29  000b 07            	dc.b	7
   30  000c 7f            	dc.b	127
   31  000d 6f            	dc.b	111
-  73                     ; 70 void setDIO(uint8_t state) {
+  73                     ; 74 void setDIO(uint8_t state) {
   75                     	switch	.text
   76  0000               _setDIO:
-  80                     ; 71     if (state) GPIO_WriteHigh(TM_DIO_PORT, TM_DIO_PIN);
+  80                     ; 75     if (state) GPIO_WriteHigh(TM_DIO_PORT, TM_DIO_PIN);
   82  0000 4d            	tnz	a
   83  0001 270b          	jreq	L72
   86  0003 4b10          	push	#16
@@ -30,18 +30,18 @@
   90  000b 84            	pop	a
   92  000c 2009          	jra	L13
   93  000e               L72:
-  94                     ; 72     else GPIO_WriteLow(TM_DIO_PORT, TM_DIO_PIN);
+  94                     ; 76     else GPIO_WriteLow(TM_DIO_PORT, TM_DIO_PIN);
   96  000e 4b10          	push	#16
   97  0010 ae5005        	ldw	x,#20485
   98  0013 cd0000        	call	_GPIO_WriteLow
  100  0016 84            	pop	a
  101  0017               L13:
- 102                     ; 73 }
+ 102                     ; 77 }
  105  0017 81            	ret
- 141                     ; 75 void setCLK(uint8_t state) {
+ 141                     ; 79 void setCLK(uint8_t state) {
  142                     	switch	.text
  143  0018               _setCLK:
- 147                     ; 76     if (state) GPIO_WriteHigh(TM_CLK_PORT, TM_CLK_PIN);
+ 147                     ; 80     if (state) GPIO_WriteHigh(TM_CLK_PORT, TM_CLK_PIN);
  149  0018 4d            	tnz	a
  150  0019 270b          	jreq	L15
  153  001b 4b20          	push	#32
@@ -50,180 +50,180 @@
  157  0023 84            	pop	a
  159  0024 2009          	jra	L35
  160  0026               L15:
- 161                     ; 77     else GPIO_WriteLow(TM_CLK_PORT, TM_CLK_PIN);
+ 161                     ; 81     else GPIO_WriteLow(TM_CLK_PORT, TM_CLK_PIN);
  163  0026 4b20          	push	#32
  164  0028 ae5005        	ldw	x,#20485
  165  002b cd0000        	call	_GPIO_WriteLow
  167  002e 84            	pop	a
  168  002f               L35:
- 169                     ; 78 }
+ 169                     ; 82 }
  172  002f 81            	ret
- 198                     ; 80 void tm_start(void) {
+ 198                     ; 84 void tm_start(void) {
  199                     	switch	.text
  200  0030               _tm_start:
- 204                     ; 81     setCLK(1);
+ 204                     ; 85     setCLK(1);
  206  0030 a601          	ld	a,#1
  207  0032 ade4          	call	_setCLK
- 209                     ; 82     setDIO(1);
+ 209                     ; 86     setDIO(1);
  211  0034 a601          	ld	a,#1
  212  0036 adc8          	call	_setDIO
- 214                     ; 83     delay_us(2);
+ 214                     ; 87     delay_us(2);
  216  0038 ae0002        	ldw	x,#2
  217  003b cd00e4        	call	_delay_us
- 219                     ; 84     setDIO(0);
+ 219                     ; 88     setDIO(0);
  221  003e 4f            	clr	a
  222  003f adbf          	call	_setDIO
- 224                     ; 85     delay_us(2);
+ 224                     ; 89     delay_us(2);
  226  0041 ae0002        	ldw	x,#2
  227  0044 cd00e4        	call	_delay_us
- 229                     ; 86     setCLK(0);
+ 229                     ; 90     setCLK(0);
  231  0047 4f            	clr	a
  232  0048 adce          	call	_setCLK
- 234                     ; 87 }
+ 234                     ; 91 }
  237  004a 81            	ret
- 263                     ; 89 void tm_stop(void) {
+ 263                     ; 93 void tm_stop(void) {
  264                     	switch	.text
  265  004b               _tm_stop:
- 269                     ; 90     setCLK(0);
+ 269                     ; 94     setCLK(0);
  271  004b 4f            	clr	a
  272  004c adca          	call	_setCLK
- 274                     ; 91     delay_us(2);
+ 274                     ; 95     delay_us(2);
  276  004e ae0002        	ldw	x,#2
  277  0051 cd00e4        	call	_delay_us
- 279                     ; 92     setDIO(0);
+ 279                     ; 96     setDIO(0);
  281  0054 4f            	clr	a
  282  0055 ada9          	call	_setDIO
- 284                     ; 93     delay_us(2);
+ 284                     ; 97     delay_us(2);
  286  0057 ae0002        	ldw	x,#2
  287  005a cd00e4        	call	_delay_us
- 289                     ; 94     setCLK(1);
+ 289                     ; 98     setCLK(1);
  291  005d a601          	ld	a,#1
  292  005f adb7          	call	_setCLK
- 294                     ; 95     delay_us(2);
+ 294                     ; 99     delay_us(2);
  296  0061 ae0002        	ldw	x,#2
  297  0064 ad7e          	call	_delay_us
- 299                     ; 96     setDIO(1);
+ 299                     ; 100     setDIO(1);
  301  0066 a601          	ld	a,#1
  302  0068 ad96          	call	_setDIO
- 304                     ; 97 }
+ 304                     ; 101 }
  307  006a 81            	ret
- 354                     ; 99 void tm_writeByte(uint8_t b) {
+ 354                     ; 103 void tm_writeByte(uint8_t b) {
  355                     	switch	.text
  356  006b               _tm_writeByte:
  358  006b 88            	push	a
  359  006c 88            	push	a
  360       00000001      OFST:	set	1
- 363                     ; 101     for (i = 0; i < 8; i++) {
+ 363                     ; 105     for (i = 0; i < 8; i++) {
  365  006d 0f01          	clr	(OFST+0,sp)
  367  006f               L711:
- 368                     ; 102         setCLK(0);
+ 368                     ; 106         setCLK(0);
  370  006f 4f            	clr	a
  371  0070 ada6          	call	_setCLK
- 373                     ; 103         setDIO(b & 0x01);
+ 373                     ; 107         setDIO(b & 0x01);
  375  0072 7b02          	ld	a,(OFST+1,sp)
  376  0074 a401          	and	a,#1
  377  0076 ad88          	call	_setDIO
- 379                     ; 104         delay_us(3);
+ 379                     ; 108         delay_us(3);
  381  0078 ae0003        	ldw	x,#3
  382  007b ad67          	call	_delay_us
- 384                     ; 105         setCLK(1);
+ 384                     ; 109         setCLK(1);
  386  007d a601          	ld	a,#1
  387  007f ad97          	call	_setCLK
- 389                     ; 106         delay_us(3);
+ 389                     ; 110         delay_us(3);
  391  0081 ae0003        	ldw	x,#3
  392  0084 ad5e          	call	_delay_us
- 394                     ; 107         b >>= 1;
+ 394                     ; 111         b >>= 1;
  396  0086 0402          	srl	(OFST+1,sp)
- 397                     ; 101     for (i = 0; i < 8; i++) {
+ 397                     ; 105     for (i = 0; i < 8; i++) {
  399  0088 0c01          	inc	(OFST+0,sp)
  403  008a 7b01          	ld	a,(OFST+0,sp)
  404  008c a108          	cp	a,#8
  405  008e 25df          	jrult	L711
- 406                     ; 111     setCLK(0);
+ 406                     ; 115     setCLK(0);
  408  0090 4f            	clr	a
  409  0091 ad85          	call	_setCLK
- 411                     ; 112     GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_IN_FL_NO_IT); // input
+ 411                     ; 116     GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_IN_FL_NO_IT); // input
  413  0093 4b00          	push	#0
  414  0095 4b10          	push	#16
  415  0097 ae5005        	ldw	x,#20485
  416  009a cd0000        	call	_GPIO_Init
  418  009d 85            	popw	x
- 419                     ; 113     delay_us(5);
+ 419                     ; 117     delay_us(5);
  421  009e ae0005        	ldw	x,#5
  422  00a1 ad41          	call	_delay_us
- 424                     ; 114     setCLK(1);
+ 424                     ; 118     setCLK(1);
  426  00a3 a601          	ld	a,#1
  427  00a5 cd0018        	call	_setCLK
- 429                     ; 115     delay_us(5);
+ 429                     ; 119     delay_us(5);
  431  00a8 ae0005        	ldw	x,#5
  432  00ab ad37          	call	_delay_us
- 434                     ; 116     setCLK(0);
+ 434                     ; 120     setCLK(0);
  436  00ad 4f            	clr	a
  437  00ae cd0018        	call	_setCLK
- 439                     ; 117     GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST); // output
+ 439                     ; 121     GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST); // output
  441  00b1 4be0          	push	#224
  442  00b3 4b10          	push	#16
  443  00b5 ae5005        	ldw	x,#20485
  444  00b8 cd0000        	call	_GPIO_Init
  446  00bb 85            	popw	x
- 447                     ; 118 }
+ 447                     ; 122 }
  450  00bc 85            	popw	x
  451  00bd 81            	ret
- 498                     ; 120 void tm_displayCharacter(uint8_t pos, uint8_t character) {
+ 498                     ; 124 void tm_displayCharacter(uint8_t pos, uint8_t character) {
  499                     	switch	.text
  500  00be               _tm_displayCharacter:
  502  00be 89            	pushw	x
  503       00000000      OFST:	set	0
- 506                     ; 121     tm_start();
+ 506                     ; 125     tm_start();
  508  00bf cd0030        	call	_tm_start
- 510                     ; 122     tm_writeByte(0x40); // auto-increment mode
+ 510                     ; 126     tm_writeByte(0x40); // auto-increment mode
  512  00c2 a640          	ld	a,#64
  513  00c4 ada5          	call	_tm_writeByte
- 515                     ; 123     tm_stop();
+ 515                     ; 127     tm_stop();
  517  00c6 ad83          	call	_tm_stop
- 519                     ; 125     tm_start();
+ 519                     ; 129     tm_start();
  521  00c8 cd0030        	call	_tm_start
- 523                     ; 126     tm_writeByte(0xC0 | pos); // start address + position
+ 523                     ; 130     tm_writeByte(0xC0 | pos); // start address + position
  525  00cb 7b01          	ld	a,(OFST+1,sp)
  526  00cd aac0          	or	a,#192
  527  00cf ad9a          	call	_tm_writeByte
- 529                     ; 127     tm_writeByte(character);
+ 529                     ; 131     tm_writeByte(character);
  531  00d1 7b02          	ld	a,(OFST+2,sp)
  532  00d3 ad96          	call	_tm_writeByte
- 534                     ; 128     tm_stop();
+ 534                     ; 132     tm_stop();
  536  00d5 cd004b        	call	_tm_stop
- 538                     ; 130     tm_start();
+ 538                     ; 134     tm_start();
  540  00d8 cd0030        	call	_tm_start
- 542                     ; 131     tm_writeByte(0x88); // display ON, brightness medium
+ 542                     ; 135     tm_writeByte(0x88); // display ON, brightness medium
  544  00db a688          	ld	a,#136
  545  00dd ad8c          	call	_tm_writeByte
- 547                     ; 132     tm_stop();
+ 547                     ; 136     tm_stop();
  549  00df cd004b        	call	_tm_stop
- 551                     ; 133 }
+ 551                     ; 137 }
  554  00e2 85            	popw	x
  555  00e3 81            	ret
- 599                     ; 135 void delay_us(uint16_t us) {
+ 599                     ; 139 void delay_us(uint16_t us) {
  600                     	switch	.text
  601  00e4               _delay_us:
  603  00e4 89            	pushw	x
  604  00e5 89            	pushw	x
  605       00000002      OFST:	set	2
- 608                     ; 137     for (i = 0; i < us; i++) {
+ 608                     ; 141     for (i = 0; i < us; i++) {
  610  00e6 5f            	clrw	x
  611  00e7 1f01          	ldw	(OFST-1,sp),x
  614  00e9 200f          	jra	L571
  615  00eb               L171:
- 616                     ; 138         _asm("nop"); _asm("nop"); _asm("nop"); _asm("nop");
+ 616                     ; 142         _asm("nop"); _asm("nop"); _asm("nop"); _asm("nop");
  619  00eb 9d            nop
  624  00ec 9d            nop
  629  00ed 9d            nop
  634  00ee 9d            nop
- 636                     ; 139         _asm("nop"); _asm("nop"); _asm("nop"); _asm("nop");
+ 636                     ; 143         _asm("nop"); _asm("nop"); _asm("nop"); _asm("nop");
  639  00ef 9d            nop
  644  00f0 9d            nop
  649  00f1 9d            nop
  654  00f2 9d            nop
- 656                     ; 137     for (i = 0; i < us; i++) {
+ 656                     ; 141     for (i = 0; i < us; i++) {
  658  00f3 1e01          	ldw	x,(OFST-1,sp)
  659  00f5 1c0001        	addw	x,#1
  660  00f8 1f01          	ldw	(OFST-1,sp),x
@@ -231,43 +231,43 @@
  665  00fa 1e01          	ldw	x,(OFST-1,sp)
  666  00fc 1303          	cpw	x,(OFST+1,sp)
  667  00fe 25eb          	jrult	L171
- 668                     ; 141 }
+ 668                     ; 145 }
  671  0100 5b04          	addw	sp,#4
  672  0102 81            	ret
- 696                     ; 143 void initKeypad(void) {
+ 696                     ; 147 void initKeypad(void) {
  697                     	switch	.text
  698  0103               _initKeypad:
- 702                     ; 145     GPIO_Init(GPIOD, ROW1_PIN | ROW2_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+ 702                     ; 149     GPIO_Init(GPIOD, ROW1_PIN | ROW2_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
  704  0103 4be0          	push	#224
  705  0105 4b60          	push	#96
  706  0107 ae500f        	ldw	x,#20495
  707  010a cd0000        	call	_GPIO_Init
  709  010d 85            	popw	x
- 710                     ; 146     GPIO_Init(GPIOE, ROW3_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+ 710                     ; 150     GPIO_Init(GPIOE, ROW3_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
  712  010e 4be0          	push	#224
  713  0110 4b01          	push	#1
  714  0112 ae5014        	ldw	x,#20500
  715  0115 cd0000        	call	_GPIO_Init
  717  0118 85            	popw	x
- 718                     ; 147     GPIO_Init(GPIOC, ROW4_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+ 718                     ; 151     GPIO_Init(GPIOC, ROW4_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
  720  0119 4be0          	push	#224
  721  011b 4b02          	push	#2
  722  011d ae500a        	ldw	x,#20490
  723  0120 cd0000        	call	_GPIO_Init
  725  0123 85            	popw	x
- 726                     ; 150     GPIO_Init(GPIOG, COL1_PIN, GPIO_MODE_IN_PU_NO_IT);
+ 726                     ; 154     GPIO_Init(GPIOG, COL1_PIN, GPIO_MODE_IN_PU_NO_IT);
  728  0124 4b40          	push	#64
  729  0126 4b01          	push	#1
  730  0128 ae501e        	ldw	x,#20510
  731  012b cd0000        	call	_GPIO_Init
  733  012e 85            	popw	x
- 734                     ; 151     GPIO_Init(GPIOC, COL2_PIN | COL3_PIN, GPIO_MODE_IN_PU_NO_IT);
+ 734                     ; 155     GPIO_Init(GPIOC, COL2_PIN | COL3_PIN, GPIO_MODE_IN_PU_NO_IT);
  736  012f 4b40          	push	#64
  737  0131 4b0c          	push	#12
  738  0133 ae500a        	ldw	x,#20490
  739  0136 cd0000        	call	_GPIO_Init
  741  0139 85            	popw	x
- 742                     ; 152 }
+ 742                     ; 156 }
  745  013a 81            	ret
  748                     	switch	.const
  749  000e               L112_keyMap:
@@ -288,38 +288,38 @@
  851  001a 000003e8      	dc.l	1000
  852  001e               L44:
  853  001e 00007530      	dc.l	30000
- 854                     ; 154 char getKey(void) {
+ 854                     ; 158 char getKey(void) {
  855                     	switch	.text
  856  013b               _getKey:
  858  013b 5218          	subw	sp,#24
  859       00000018      OFST:	set	24
- 862                     ; 155     const char keyMap[4][3] = {
- 862                     ; 156         {'1', '2', '3'},
- 862                     ; 157         {'4', '5', '6'},
- 862                     ; 158         {'7', '8', '9'},
- 862                     ; 159         {'*', '0', '#'}
- 862                     ; 160     };
+ 862                     ; 159     const char keyMap[4][3] = {
+ 862                     ; 160         {'1', '2', '3'},
+ 862                     ; 161         {'4', '5', '6'},
+ 862                     ; 162         {'7', '8', '9'},
+ 862                     ; 163         {'*', '0', '#'}
+ 862                     ; 164     };
  864  013d 96            	ldw	x,sp
  865  013e 1c0004        	addw	x,#OFST-20
  866  0141 90ae000e      	ldw	y,#L112_keyMap
  867  0145 a60c          	ld	a,#12
  868  0147 cd0000        	call	c_xymov
- 870                     ; 163     char key = 0;
- 872                     ; 167     GPIOD->ODR |= ROW1_PIN | ROW2_PIN;
+ 870                     ; 167     char key = 0;
+ 872                     ; 171     GPIOD->ODR |= ROW1_PIN | ROW2_PIN;
  874  014a c6500f        	ld	a,20495
  875  014d aa60          	or	a,#96
  876  014f c7500f        	ld	20495,a
- 877                     ; 168     GPIOE->ODR |= ROW3_PIN;
+ 877                     ; 172     GPIOE->ODR |= ROW3_PIN;
  879  0152 72105014      	bset	20500,#0
- 880                     ; 169     GPIOC->ODR |= ROW4_PIN;
+ 880                     ; 173     GPIOC->ODR |= ROW4_PIN;
  882  0156 7212500a      	bset	20490,#1
- 883                     ; 171     for (row = 0; row < 4; row++) {
+ 883                     ; 175     for (row = 0; row < 4; row++) {
  885  015a 5f            	clrw	x
  886  015b 1f11          	ldw	(OFST-7,sp),x
  888  015d               L333:
- 889                     ; 173         switch (row) {
+ 889                     ; 177         switch (row) {
  891  015d 1e11          	ldw	x,(OFST-7,sp)
- 893                     ; 177             case 3: GPIOC->ODR &= ~ROW4_PIN; break;
+ 893                     ; 181             case 3: GPIOC->ODR &= ~ROW4_PIN; break;
  894  015f 5d            	tnzw	x
  895  0160 270b          	jreq	L312
  896  0162 5a            	decw	x
@@ -330,22 +330,22 @@
  901  0169 2714          	jreq	L122
  902  016b 2016          	jra	L343
  903  016d               L312:
- 904                     ; 174             case 0: GPIOD->ODR &= ~ROW1_PIN; break;
+ 904                     ; 178             case 0: GPIOD->ODR &= ~ROW1_PIN; break;
  906  016d 721d500f      	bres	20495,#6
  909  0171 2010          	jra	L343
  910  0173               L512:
- 911                     ; 175             case 1: GPIOD->ODR &= ~ROW2_PIN; break;
+ 911                     ; 179             case 1: GPIOD->ODR &= ~ROW2_PIN; break;
  913  0173 721b500f      	bres	20495,#5
  916  0177 200a          	jra	L343
  917  0179               L712:
- 918                     ; 176             case 2: GPIOE->ODR &= ~ROW3_PIN; break;
+ 918                     ; 180             case 2: GPIOE->ODR &= ~ROW3_PIN; break;
  920  0179 72115014      	bres	20500,#0
  923  017d 2004          	jra	L343
  924  017f               L122:
- 925                     ; 177             case 3: GPIOC->ODR &= ~ROW4_PIN; break;
+ 925                     ; 181             case 3: GPIOC->ODR &= ~ROW4_PIN; break;
  927  017f 7213500a      	bres	20490,#1
  930  0183               L343:
- 931                     ; 180         for (i = 0; i < 1000; i++); // malé zpoždìní
+ 931                     ; 184         for (i = 0; i < 1000; i++); // malé zpoždìní
  933  0183 ae0000        	ldw	x,#0
  934  0186 1f15          	ldw	(OFST-3,sp),x
  935  0188 ae0000        	ldw	x,#0
@@ -361,16 +361,16 @@
  954  019d ae001a        	ldw	x,#L62
  955  01a0 cd0000        	call	c_lcmp
  957  01a3 25e8          	jrult	L543
- 958                     ; 182         for (col = 0; col < 3; col++) {
+ 958                     ; 186         for (col = 0; col < 3; col++) {
  960  01a5 5f            	clrw	x
  961  01a6 1f17          	ldw	(OFST-1,sp),x
  963  01a8               L353:
- 964                     ; 183             uint8_t colState = 1;
+ 964                     ; 187             uint8_t colState = 1;
  966  01a8 a601          	ld	a,#1
  967  01aa 6b03          	ld	(OFST-21,sp),a
- 969                     ; 185             switch (col) {
+ 969                     ; 189             switch (col) {
  971  01ac 1e17          	ldw	x,(OFST-1,sp)
- 973                     ; 188                 case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
+ 973                     ; 192                 case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
  974  01ae 5d            	tnzw	x
  975  01af 2708          	jreq	L322
  976  01b1 5a            	decw	x
@@ -379,7 +379,7 @@
  979  01b5 2722          	jreq	L722
  980  01b7 202e          	jra	L363
  981  01b9               L322:
- 982                     ; 186                 case 0: colState = !(GPIOG->IDR & COL1_PIN); break;
+ 982                     ; 190                 case 0: colState = !(GPIOG->IDR & COL1_PIN); break;
  984  01b9 c6501f        	ld	a,20511
  985  01bc a501          	bcp	a,#1
  986  01be 2604          	jrne	L03
@@ -391,7 +391,7 @@
  992  01c5 6b03          	ld	(OFST-21,sp),a
  996  01c7 201e          	jra	L363
  997  01c9               L522:
- 998                     ; 187                 case 1: colState = !(GPIOC->IDR & COL2_PIN); break;
+ 998                     ; 191                 case 1: colState = !(GPIOC->IDR & COL2_PIN); break;
 1000  01c9 c6500b        	ld	a,20491
 1001  01cc a504          	bcp	a,#4
 1002  01ce 2604          	jrne	L43
@@ -403,7 +403,7 @@
 1008  01d5 6b03          	ld	(OFST-21,sp),a
 1012  01d7 200e          	jra	L363
 1013  01d9               L722:
-1014                     ; 188                 case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
+1014                     ; 192                 case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
 1016  01d9 c6500b        	ld	a,20491
 1017  01dc a508          	bcp	a,#8
 1018  01de 2604          	jrne	L04
@@ -414,12 +414,12 @@
 1023  01e5               L24:
 1024  01e5 6b03          	ld	(OFST-21,sp),a
 1028  01e7               L363:
-1029                     ; 191             if (colState) {
+1029                     ; 195             if (colState) {
 1031  01e7 0d03          	tnz	(OFST-21,sp)
 1032  01e9 2603          	jrne	L001
 1033  01eb cc02d3        	jp	L563
 1034  01ee               L001:
-1035                     ; 192                 for (i = 0; i < 30000; i++); // debounce
+1035                     ; 196                 for (i = 0; i < 30000; i++); // debounce
 1037  01ee ae0000        	ldw	x,#0
 1038  01f1 1f15          	ldw	(OFST-3,sp),x
 1039  01f3 ae0000        	ldw	x,#0
@@ -435,9 +435,9 @@
 1058  0208 ae001e        	ldw	x,#L44
 1059  020b cd0000        	call	c_lcmp
 1061  020e 25e8          	jrult	L763
-1062                     ; 195                 switch (col) {
+1062                     ; 199                 switch (col) {
 1064  0210 1e17          	ldw	x,(OFST-1,sp)
-1066                     ; 198                     case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
+1066                     ; 202                     case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
 1067  0212 5d            	tnzw	x
 1068  0213 2708          	jreq	L132
 1069  0215 5a            	decw	x
@@ -446,7 +446,7 @@
 1072  0219 2722          	jreq	L532
 1073  021b 202e          	jra	L773
 1074  021d               L132:
-1075                     ; 196                     case 0: colState = !(GPIOG->IDR & COL1_PIN); break;
+1075                     ; 200                     case 0: colState = !(GPIOG->IDR & COL1_PIN); break;
 1077  021d c6501f        	ld	a,20511
 1078  0220 a501          	bcp	a,#1
 1079  0222 2604          	jrne	L64
@@ -458,7 +458,7 @@
 1085  0229 6b03          	ld	(OFST-21,sp),a
 1089  022b 201e          	jra	L773
 1090  022d               L332:
-1091                     ; 197                     case 1: colState = !(GPIOC->IDR & COL2_PIN); break;
+1091                     ; 201                     case 1: colState = !(GPIOC->IDR & COL2_PIN); break;
 1093  022d c6500b        	ld	a,20491
 1094  0230 a504          	bcp	a,#4
 1095  0232 2604          	jrne	L25
@@ -470,7 +470,7 @@
 1101  0239 6b03          	ld	(OFST-21,sp),a
 1105  023b 200e          	jra	L773
 1106  023d               L532:
-1107                     ; 198                     case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
+1107                     ; 202                     case 2: colState = !(GPIOC->IDR & COL3_PIN); break;
 1109  023d c6500b        	ld	a,20491
 1110  0240 a508          	bcp	a,#8
 1111  0242 2604          	jrne	L65
@@ -481,12 +481,12 @@
 1116  0249               L06:
 1117  0249 6b03          	ld	(OFST-21,sp),a
 1121  024b               L773:
-1122                     ; 201                 if (colState) {
+1122                     ; 205                 if (colState) {
 1124  024b 0d03          	tnz	(OFST-21,sp)
 1125  024d 2603          	jrne	L201
 1126  024f cc02d3        	jp	L563
 1127  0252               L201:
-1128                     ; 202                     key = keyMap[row][col];
+1128                     ; 206                     key = keyMap[row][col];
 1130  0252 96            	ldw	x,sp
 1131  0253 1c0004        	addw	x,#OFST-20
 1132  0256 1f01          	ldw	(OFST-23,sp),x
@@ -498,11 +498,11 @@
 1140  0265 f6            	ld	a,(x)
 1141  0266 6b10          	ld	(OFST-8,sp),a
 1143  0268               L304:
-1144                     ; 206                         uint8_t released = 0;
+1144                     ; 210                         uint8_t released = 0;
 1146  0268 0f03          	clr	(OFST-21,sp)
-1148                     ; 207                         switch (col) {
+1148                     ; 211                         switch (col) {
 1150  026a 1e17          	ldw	x,(OFST-1,sp)
-1152                     ; 210                             case 2: released = (GPIOC->IDR & COL3_PIN) != 0; break;
+1152                     ; 214                             case 2: released = (GPIOC->IDR & COL3_PIN) != 0; break;
 1153  026c 5d            	tnzw	x
 1154  026d 2708          	jreq	L732
 1155  026f 5a            	decw	x
@@ -511,7 +511,7 @@
 1158  0273 2722          	jreq	L342
 1159  0275 202e          	jra	L114
 1160  0277               L732:
-1161                     ; 208                             case 0: released = (GPIOG->IDR & COL1_PIN) != 0; break;
+1161                     ; 212                             case 0: released = (GPIOG->IDR & COL1_PIN) != 0; break;
 1163  0277 c6501f        	ld	a,20511
 1164  027a a501          	bcp	a,#1
 1165  027c 2704          	jreq	L26
@@ -523,7 +523,7 @@
 1171  0283 6b03          	ld	(OFST-21,sp),a
 1175  0285 201e          	jra	L114
 1176  0287               L142:
-1177                     ; 209                             case 1: released = (GPIOC->IDR & COL2_PIN) != 0; break;
+1177                     ; 213                             case 1: released = (GPIOC->IDR & COL2_PIN) != 0; break;
 1179  0287 c6500b        	ld	a,20491
 1180  028a a504          	bcp	a,#4
 1181  028c 2704          	jreq	L66
@@ -535,7 +535,7 @@
 1187  0293 6b03          	ld	(OFST-21,sp),a
 1191  0295 200e          	jra	L114
 1192  0297               L342:
-1193                     ; 210                             case 2: released = (GPIOC->IDR & COL3_PIN) != 0; break;
+1193                     ; 214                             case 2: released = (GPIOC->IDR & COL3_PIN) != 0; break;
 1195  0297 c6500b        	ld	a,20491
 1196  029a a508          	bcp	a,#8
 1197  029c 2704          	jreq	L27
@@ -546,12 +546,12 @@
 1202  02a3               L47:
 1203  02a3 6b03          	ld	(OFST-21,sp),a
 1207  02a5               L114:
-1208                     ; 212                         if (released) break;
+1208                     ; 216                         if (released) break;
 1210  02a5 0d03          	tnz	(OFST-21,sp)
 1211  02a7 27bf          	jreq	L304
-1213                     ; 216                     switch (row) {
+1213                     ; 220                     switch (row) {
 1215  02a9 1e11          	ldw	x,(OFST-7,sp)
-1217                     ; 220                         case 3: GPIOC->ODR |= ROW4_PIN; break;
+1217                     ; 224                         case 3: GPIOC->ODR |= ROW4_PIN; break;
 1218  02ab 5d            	tnzw	x
 1219  02ac 270b          	jreq	L542
 1220  02ae 5a            	decw	x
@@ -562,26 +562,26 @@
 1225  02b5 2714          	jreq	L352
 1226  02b7 2016          	jra	L714
 1227  02b9               L542:
-1228                     ; 217                         case 0: GPIOD->ODR |= ROW1_PIN; break;
+1228                     ; 221                         case 0: GPIOD->ODR |= ROW1_PIN; break;
 1230  02b9 721c500f      	bset	20495,#6
 1233  02bd 2010          	jra	L714
 1234  02bf               L742:
-1235                     ; 218                         case 1: GPIOD->ODR |= ROW2_PIN; break;
+1235                     ; 222                         case 1: GPIOD->ODR |= ROW2_PIN; break;
 1237  02bf 721a500f      	bset	20495,#5
 1240  02c3 200a          	jra	L714
 1241  02c5               L152:
-1242                     ; 219                         case 2: GPIOE->ODR |= ROW3_PIN; break;
+1242                     ; 223                         case 2: GPIOE->ODR |= ROW3_PIN; break;
 1244  02c5 72105014      	bset	20500,#0
 1247  02c9 2004          	jra	L714
 1248  02cb               L352:
-1249                     ; 220                         case 3: GPIOC->ODR |= ROW4_PIN; break;
+1249                     ; 224                         case 3: GPIOC->ODR |= ROW4_PIN; break;
 1251  02cb 7212500a      	bset	20490,#1
 1254  02cf               L714:
-1255                     ; 223                     return key;
+1255                     ; 227                     return key;
 1257  02cf 7b10          	ld	a,(OFST-8,sp)
 1259  02d1 204b          	jra	L67
 1260  02d3               L563:
-1261                     ; 182         for (col = 0; col < 3; col++) {
+1261                     ; 186         for (col = 0; col < 3; col++) {
 1263  02d3 1e17          	ldw	x,(OFST-1,sp)
 1264  02d5 1c0001        	addw	x,#1
 1265  02d8 1f17          	ldw	(OFST-1,sp),x
@@ -591,9 +591,9 @@
 1272  02e0 2e03          	jrsge	L401
 1273  02e2 cc01a8        	jp	L353
 1274  02e5               L401:
-1275                     ; 229         switch (row) {
+1275                     ; 233         switch (row) {
 1277  02e5 1e11          	ldw	x,(OFST-7,sp)
-1279                     ; 233             case 3: GPIOC->ODR |= ROW4_PIN; break;
+1279                     ; 237             case 3: GPIOC->ODR |= ROW4_PIN; break;
 1280  02e7 5d            	tnzw	x
 1281  02e8 270b          	jreq	L552
 1282  02ea 5a            	decw	x
@@ -604,22 +604,22 @@
 1287  02f1 2714          	jreq	L362
 1288  02f3 2016          	jra	L324
 1289  02f5               L552:
-1290                     ; 230             case 0: GPIOD->ODR |= ROW1_PIN; break;
+1290                     ; 234             case 0: GPIOD->ODR |= ROW1_PIN; break;
 1292  02f5 721c500f      	bset	20495,#6
 1295  02f9 2010          	jra	L324
 1296  02fb               L752:
-1297                     ; 231             case 1: GPIOD->ODR |= ROW2_PIN; break;
+1297                     ; 235             case 1: GPIOD->ODR |= ROW2_PIN; break;
 1299  02fb 721a500f      	bset	20495,#5
 1302  02ff 200a          	jra	L324
 1303  0301               L162:
-1304                     ; 232             case 2: GPIOE->ODR |= ROW3_PIN; break;
+1304                     ; 236             case 2: GPIOE->ODR |= ROW3_PIN; break;
 1306  0301 72105014      	bset	20500,#0
 1309  0305 2004          	jra	L324
 1310  0307               L362:
-1311                     ; 233             case 3: GPIOC->ODR |= ROW4_PIN; break;
+1311                     ; 237             case 3: GPIOC->ODR |= ROW4_PIN; break;
 1313  0307 7212500a      	bset	20490,#1
 1316  030b               L324:
-1317                     ; 171     for (row = 0; row < 4; row++) {
+1317                     ; 175     for (row = 0; row < 4; row++) {
 1319  030b 1e11          	ldw	x,(OFST-7,sp)
 1320  030d 1c0001        	addw	x,#1
 1321  0310 1f11          	ldw	(OFST-7,sp),x
@@ -629,34 +629,34 @@
 1328  0318 2e03          	jrsge	L601
 1329  031a cc015d        	jp	L333
 1330  031d               L601:
-1331                     ; 237     return 0; // žádná klávesa
+1331                     ; 241     return 0; // žádná klávesa
 1333  031d 4f            	clr	a
 1335  031e               L67:
 1337  031e 5b18          	addw	sp,#24
 1338  0320 81            	ret
-1363                     ; 242 void buzzerInit(void) {
+1363                     ; 246 void buzzerInit(void) {
 1364                     	switch	.text
 1365  0321               _buzzerInit:
-1369                     ; 244     GPIO_Init(BUZZER_PORT, BUZZER_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+1369                     ; 248     GPIO_Init(BUZZER_PORT, BUZZER_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 1371  0321 4be0          	push	#224
 1372  0323 4b08          	push	#8
 1373  0325 ae500f        	ldw	x,#20495
 1374  0328 cd0000        	call	_GPIO_Init
 1376  032b 85            	popw	x
-1377                     ; 245     GPIO_WriteLow(BUZZER_PORT, BUZZER_PIN);
+1377                     ; 249     GPIO_WriteLow(BUZZER_PORT, BUZZER_PIN);
 1379  032c 4b08          	push	#8
 1380  032e ae500f        	ldw	x,#20495
 1381  0331 cd0000        	call	_GPIO_WriteLow
 1383  0334 84            	pop	a
-1384                     ; 246 }
+1384                     ; 250 }
 1387  0335 81            	ret
-1460                     ; 248 void beepTone(uint16_t freq, uint16_t duration_ms) {
+1460                     ; 252 void beepTone(uint16_t freq, uint16_t duration_ms) {
 1461                     	switch	.text
 1462  0336               _beepTone:
 1464  0336 89            	pushw	x
 1465  0337 5210          	subw	sp,#16
 1466       00000010      OFST:	set	16
-1469                     ; 252     uint32_t delay = 1000000 / (freq * 2); // poloviny periody v us
+1469                     ; 256     uint32_t delay = 1000000 / (freq * 2); // poloviny periody v us
 1471  0339 58            	sllw	x
 1472  033a cd0000        	call	c_uitolx
 1474  033d 96            	ldw	x,sp
@@ -672,7 +672,7 @@
 1487  0355 96            	ldw	x,sp
 1488  0356 1c000d        	addw	x,#OFST-3
 1489  0359 cd0000        	call	c_rtol
-1492                     ; 253     uint32_t cycles = (uint32_t)freq * duration_ms / 1000;
+1492                     ; 257     uint32_t cycles = (uint32_t)freq * duration_ms / 1000;
 1494  035c 1e11          	ldw	x,(OFST+1,sp)
 1495  035e 1615          	ldw	y,(OFST+5,sp)
 1496  0360 cd0000        	call	c_umul
@@ -681,30 +681,30 @@
 1501  0369 96            	ldw	x,sp
 1502  036a 1c0005        	addw	x,#OFST-11
 1503  036d cd0000        	call	c_rtol
-1506                     ; 255     for (i = 0; i < cycles; i++) {
+1506                     ; 259     for (i = 0; i < cycles; i++) {
 1508  0370 ae0000        	ldw	x,#0
 1509  0373 1f0b          	ldw	(OFST-5,sp),x
 1510  0375 ae0000        	ldw	x,#0
 1511  0378 1f09          	ldw	(OFST-7,sp),x
 1514  037a 2025          	jra	L774
 1515  037c               L374:
-1516                     ; 256         GPIO_WriteHigh(BUZZER_PORT, BUZZER_PIN);
+1516                     ; 260         GPIO_WriteHigh(BUZZER_PORT, BUZZER_PIN);
 1518  037c 4b08          	push	#8
 1519  037e ae500f        	ldw	x,#20495
 1520  0381 cd0000        	call	_GPIO_WriteHigh
 1522  0384 84            	pop	a
-1523                     ; 257         delay_us(delay);
+1523                     ; 261         delay_us(delay);
 1525  0385 1e0f          	ldw	x,(OFST-1,sp)
 1526  0387 cd00e4        	call	_delay_us
-1528                     ; 258         GPIO_WriteLow(BUZZER_PORT, BUZZER_PIN);
+1528                     ; 262         GPIO_WriteLow(BUZZER_PORT, BUZZER_PIN);
 1530  038a 4b08          	push	#8
 1531  038c ae500f        	ldw	x,#20495
 1532  038f cd0000        	call	_GPIO_WriteLow
 1534  0392 84            	pop	a
-1535                     ; 259         delay_us(delay);
+1535                     ; 263         delay_us(delay);
 1537  0393 1e0f          	ldw	x,(OFST-1,sp)
 1538  0395 cd00e4        	call	_delay_us
-1540                     ; 255     for (i = 0; i < cycles; i++) {
+1540                     ; 259     for (i = 0; i < cycles; i++) {
 1542  0398 96            	ldw	x,sp
 1543  0399 1c0009        	addw	x,#OFST-7
 1544  039c a601          	ld	a,#1
@@ -717,820 +717,1021 @@
 1556  03a9 1c0005        	addw	x,#OFST-11
 1557  03ac cd0000        	call	c_lcmp
 1559  03af 25cb          	jrult	L374
-1560                     ; 261 }
+1560                     ; 265 }
 1563  03b1 5b12          	addw	sp,#18
 1564  03b3 81            	ret
-1588                     ; 263 void beepSuccess(void) {
-1589                     	switch	.text
-1590  03b4               _beepSuccess:
-1594                     ; 264     beepTone(1000, 100);
-1596  03b4 ae0064        	ldw	x,#100
-1597  03b7 89            	pushw	x
-1598  03b8 ae03e8        	ldw	x,#1000
-1599  03bb cd0336        	call	_beepTone
-1601  03be 85            	popw	x
-1602                     ; 265 }
-1605  03bf 81            	ret
-1630                     ; 267 void beepFail(void) {
-1631                     	switch	.text
-1632  03c0               _beepFail:
-1636                     ; 268     beepTone(500, 100);
-1638  03c0 ae0064        	ldw	x,#100
-1639  03c3 89            	pushw	x
-1640  03c4 ae01f4        	ldw	x,#500
-1641  03c7 cd0336        	call	_beepTone
-1643  03ca 85            	popw	x
-1644                     ; 269     delay_us(100000);
-1646  03cb ae86a0        	ldw	x,#34464
-1647  03ce cd00e4        	call	_delay_us
-1649                     ; 270     beepTone(500, 100);
-1651  03d1 ae0064        	ldw	x,#100
-1652  03d4 89            	pushw	x
-1653  03d5 ae01f4        	ldw	x,#500
-1654  03d8 cd0336        	call	_beepTone
-1656  03db 85            	popw	x
-1657                     ; 271 }
-1660  03dc 81            	ret
-1694                     ; 274 uint8_t EEPROM_ReadByte(uint16_t addr) {
-1695                     	switch	.text
-1696  03dd               _EEPROM_ReadByte:
-1700                     ; 276     return *((uint8_t*)addr);
-1702  03dd f6            	ld	a,(x)
-1705  03de 81            	ret
-1751                     ; 280 void EEPROM_WriteByte(uint16_t addr, uint8_t data) {
-1752                     	switch	.text
-1753  03df               _EEPROM_WriteByte:
-1755  03df 89            	pushw	x
-1756       00000000      OFST:	set	0
-1759                     ; 282     FLASH_Unlock(FLASH_MEMTYPE_DATA);
-1761  03e0 a6f7          	ld	a,#247
-1762  03e2 cd0000        	call	_FLASH_Unlock
-1764                     ; 283     FLASH_ProgramByte(addr, data);
-1766  03e5 7b05          	ld	a,(OFST+5,sp)
-1767  03e7 88            	push	a
-1768  03e8 1e02          	ldw	x,(OFST+2,sp)
-1769  03ea cd0000        	call	c_uitolx
-1771  03ed be02          	ldw	x,c_lreg+2
-1772  03ef 89            	pushw	x
-1773  03f0 be00          	ldw	x,c_lreg
-1774  03f2 89            	pushw	x
-1775  03f3 cd0000        	call	_FLASH_ProgramByte
-1777  03f6 5b05          	addw	sp,#5
-1778                     ; 284     FLASH_Lock(FLASH_MEMTYPE_DATA);
-1780  03f8 a6f7          	ld	a,#247
-1781  03fa cd0000        	call	_FLASH_Lock
-1783                     ; 285 }
-1786  03fd 85            	popw	x
-1787  03fe 81            	ret
-1834                     ; 288 void loadPINfromEEPROM(void) {
-1835                     	switch	.text
-1836  03ff               _loadPINfromEEPROM:
-1838  03ff 89            	pushw	x
-1839       00000002      OFST:	set	2
-1842                     ; 290     uint8_t valid = 1;
-1844  0400 a601          	ld	a,#1
-1845  0402 6b01          	ld	(OFST-1,sp),a
-1847                     ; 291     for (i = 0; i < 4; i++) {
-1849  0404 0f02          	clr	(OFST+0,sp)
-1851  0406               L506:
-1852                     ; 292         storedPIN[i] = EEPROM_ReadByte(EEPROM_PIN_ADDR + i);
-1854  0406 7b02          	ld	a,(OFST+0,sp)
-1855  0408 5f            	clrw	x
-1856  0409 97            	ld	xl,a
-1857  040a 89            	pushw	x
-1858  040b 7b04          	ld	a,(OFST+2,sp)
-1859  040d 5f            	clrw	x
-1860  040e 97            	ld	xl,a
-1861  040f 1c4000        	addw	x,#16384
-1862  0412 adc9          	call	_EEPROM_ReadByte
-1864  0414 85            	popw	x
-1865  0415 e700          	ld	(_storedPIN,x),a
-1866                     ; 294         if (storedPIN[i] < '0' || storedPIN[i] > '9') {
-1868  0417 7b02          	ld	a,(OFST+0,sp)
-1869  0419 5f            	clrw	x
-1870  041a 97            	ld	xl,a
-1871  041b e600          	ld	a,(_storedPIN,x)
-1872  041d a130          	cp	a,#48
-1873  041f 250a          	jrult	L516
-1875  0421 7b02          	ld	a,(OFST+0,sp)
-1876  0423 5f            	clrw	x
-1877  0424 97            	ld	xl,a
-1878  0425 e600          	ld	a,(_storedPIN,x)
-1879  0427 a13a          	cp	a,#58
-1880  0429 2502          	jrult	L316
-1881  042b               L516:
-1882                     ; 295             valid = 0;
-1884  042b 0f01          	clr	(OFST-1,sp)
-1886  042d               L316:
-1887                     ; 291     for (i = 0; i < 4; i++) {
-1889  042d 0c02          	inc	(OFST+0,sp)
-1893  042f 7b02          	ld	a,(OFST+0,sp)
-1894  0431 a104          	cp	a,#4
-1895  0433 25d1          	jrult	L506
-1896                     ; 298     if (!valid) {
-1898  0435 0d01          	tnz	(OFST-1,sp)
-1899  0437 2625          	jrne	L716
-1900                     ; 300         for (i = 0; i < 4; i++) {
-1902  0439 0f02          	clr	(OFST+0,sp)
-1904  043b               L126:
-1905                     ; 301             storedPIN[i] = defaultPIN[i];
-1907  043b 7b02          	ld	a,(OFST+0,sp)
-1908  043d 5f            	clrw	x
-1909  043e 97            	ld	xl,a
-1910  043f d60000        	ld	a,(_defaultPIN,x)
-1911  0442 e700          	ld	(_storedPIN,x),a
-1912                     ; 302             EEPROM_WriteByte(EEPROM_PIN_ADDR + i, defaultPIN[i]);
-1914  0444 7b02          	ld	a,(OFST+0,sp)
-1915  0446 5f            	clrw	x
-1916  0447 97            	ld	xl,a
-1917  0448 d60000        	ld	a,(_defaultPIN,x)
-1918  044b 88            	push	a
-1919  044c 7b03          	ld	a,(OFST+1,sp)
-1920  044e 5f            	clrw	x
-1921  044f 97            	ld	xl,a
-1922  0450 1c4000        	addw	x,#16384
-1923  0453 ad8a          	call	_EEPROM_WriteByte
-1925  0455 84            	pop	a
-1926                     ; 300         for (i = 0; i < 4; i++) {
-1928  0456 0c02          	inc	(OFST+0,sp)
-1932  0458 7b02          	ld	a,(OFST+0,sp)
-1933  045a a104          	cp	a,#4
-1934  045c 25dd          	jrult	L126
-1935  045e               L716:
-1936                     ; 305 }
-1939  045e 85            	popw	x
-1940  045f 81            	ret
-1986                     ; 308 void savePINtoEEPROM(const char* newPIN) {
-1987                     	switch	.text
-1988  0460               _savePINtoEEPROM:
-1990  0460 89            	pushw	x
-1991  0461 88            	push	a
-1992       00000001      OFST:	set	1
-1995                     ; 310     for (i = 0; i < 4; i++) {
-1997  0462 0f01          	clr	(OFST+0,sp)
-1999  0464               L156:
-2000                     ; 311         storedPIN[i] = newPIN[i];
-2002  0464 7b01          	ld	a,(OFST+0,sp)
-2003  0466 5f            	clrw	x
-2004  0467 97            	ld	xl,a
-2005  0468 7b01          	ld	a,(OFST+0,sp)
-2006  046a 905f          	clrw	y
-2007  046c 9097          	ld	yl,a
-2008  046e 72f902        	addw	y,(OFST+1,sp)
-2009  0471 90f6          	ld	a,(y)
-2010  0473 e700          	ld	(_storedPIN,x),a
-2011                     ; 312         EEPROM_WriteByte(EEPROM_PIN_ADDR + i, newPIN[i]);
-2013  0475 7b01          	ld	a,(OFST+0,sp)
-2014  0477 5f            	clrw	x
-2015  0478 97            	ld	xl,a
-2016  0479 72fb02        	addw	x,(OFST+1,sp)
-2017  047c f6            	ld	a,(x)
-2018  047d 88            	push	a
-2019  047e 7b02          	ld	a,(OFST+1,sp)
-2020  0480 5f            	clrw	x
-2021  0481 97            	ld	xl,a
-2022  0482 1c4000        	addw	x,#16384
-2023  0485 cd03df        	call	_EEPROM_WriteByte
-2025  0488 84            	pop	a
-2026                     ; 310     for (i = 0; i < 4; i++) {
-2028  0489 0c01          	inc	(OFST+0,sp)
-2032  048b 7b01          	ld	a,(OFST+0,sp)
-2033  048d a104          	cp	a,#4
-2034  048f 25d3          	jrult	L156
-2035                     ; 314 }
-2038  0491 5b03          	addw	sp,#3
-2039  0493 81            	ret
-2093                     ; 317 uint8_t comparePIN(const char* a, const char* b) {
-2094                     	switch	.text
-2095  0494               _comparePIN:
-2097  0494 89            	pushw	x
-2098  0495 88            	push	a
-2099       00000001      OFST:	set	1
-2102                     ; 319     for (i = 0; i < 4; i++) {
-2104  0496 0f01          	clr	(OFST+0,sp)
-2106  0498               L507:
-2107                     ; 320         if (a[i] != b[i]) return 0;
-2109  0498 7b01          	ld	a,(OFST+0,sp)
-2110  049a 5f            	clrw	x
-2111  049b 97            	ld	xl,a
-2112  049c 72fb06        	addw	x,(OFST+5,sp)
-2113  049f 7b01          	ld	a,(OFST+0,sp)
-2114  04a1 905f          	clrw	y
-2115  04a3 9097          	ld	yl,a
-2116  04a5 72f902        	addw	y,(OFST+1,sp)
-2117  04a8 90f6          	ld	a,(y)
-2118  04aa f1            	cp	a,(x)
-2119  04ab 2703          	jreq	L317
-2122  04ad 4f            	clr	a
-2124  04ae 200a          	jra	L231
-2125  04b0               L317:
-2126                     ; 319     for (i = 0; i < 4; i++) {
-2128  04b0 0c01          	inc	(OFST+0,sp)
-2132  04b2 7b01          	ld	a,(OFST+0,sp)
-2133  04b4 a104          	cp	a,#4
-2134  04b6 25e0          	jrult	L507
-2135                     ; 322     return 1;
-2137  04b8 a601          	ld	a,#1
-2139  04ba               L231:
-2141  04ba 5b03          	addw	sp,#3
-2142  04bc 81            	ret
-2196                     ; 326 void blinkDisplay(uint8_t times) {
-2197                     	switch	.text
-2198  04bd               _blinkDisplay:
-2200  04bd 88            	push	a
-2201  04be 89            	pushw	x
-2202       00000002      OFST:	set	2
-2205                     ; 328     for (i = 0; i < times; i++) {
-2207  04bf 0f01          	clr	(OFST-1,sp)
-2210  04c1 2032          	jra	L747
-2211  04c3               L347:
-2212                     ; 330         for (j = 0; j < 4; j++) {
-2214  04c3 0f02          	clr	(OFST+0,sp)
-2216  04c5               L357:
-2217                     ; 331             tm_displayCharacter(j, 0x7F); // 0x7F = všechny segmenty ON
-2219  04c5 7b02          	ld	a,(OFST+0,sp)
-2220  04c7 ae007f        	ldw	x,#127
-2221  04ca 95            	ld	xh,a
-2222  04cb cd00be        	call	_tm_displayCharacter
-2224                     ; 330         for (j = 0; j < 4; j++) {
-2226  04ce 0c02          	inc	(OFST+0,sp)
-2230  04d0 7b02          	ld	a,(OFST+0,sp)
-2231  04d2 a104          	cp	a,#4
-2232  04d4 25ef          	jrult	L357
-2233                     ; 333         delay_us(300000);  // ~300 ms (potøebuješ delší delay, mùžeš upravit)
-2235  04d6 ae93e0        	ldw	x,#37856
-2236  04d9 cd00e4        	call	_delay_us
-2238                     ; 336         for (j = 0; j < 4; j++) {
-2240  04dc 0f02          	clr	(OFST+0,sp)
-2242  04de               L167:
-2243                     ; 337             tm_displayCharacter(j, 0x00);
-2245  04de 7b02          	ld	a,(OFST+0,sp)
-2246  04e0 5f            	clrw	x
-2247  04e1 95            	ld	xh,a
-2248  04e2 cd00be        	call	_tm_displayCharacter
-2250                     ; 336         for (j = 0; j < 4; j++) {
-2252  04e5 0c02          	inc	(OFST+0,sp)
-2256  04e7 7b02          	ld	a,(OFST+0,sp)
-2257  04e9 a104          	cp	a,#4
-2258  04eb 25f1          	jrult	L167
-2259                     ; 339         delay_us(300000);
-2261  04ed ae93e0        	ldw	x,#37856
-2262  04f0 cd00e4        	call	_delay_us
-2264                     ; 328     for (i = 0; i < times; i++) {
-2266  04f3 0c01          	inc	(OFST-1,sp)
-2268  04f5               L747:
-2271  04f5 7b01          	ld	a,(OFST-1,sp)
-2272  04f7 1103          	cp	a,(OFST+1,sp)
-2273  04f9 25c8          	jrult	L347
-2274                     ; 341 }
-2277  04fb 5b03          	addw	sp,#3
-2278  04fd 81            	ret
-2305                     ; 345 void factoryResetPIN(void) {
-2306                     	switch	.text
-2307  04fe               _factoryResetPIN:
-2311                     ; 346     savePINtoEEPROM(defaultPIN);
-2313  04fe ae0000        	ldw	x,#_defaultPIN
-2314  0501 cd0460        	call	_savePINtoEEPROM
-2316                     ; 347     beepSuccess();
-2318  0504 cd03b4        	call	_beepSuccess
-2320                     ; 348     blinkDisplay(2); // blikni 2x po resetu
-2322  0507 a602          	ld	a,#2
-2323  0509 adb2          	call	_blinkDisplay
-2325                     ; 349 }
-2328  050b 81            	ret
-2331                     	switch	.const
-2332  0022               L777_userInput:
-2333  0022 20            	dc.b	32
-2334  0023 20            	dc.b	32
-2335  0024 20            	dc.b	32
-2336  0025 20            	dc.b	32
-2470                     ; 352 void main(void) {
-2471                     	switch	.text
-2472  050c               _main:
-2474  050c 5214          	subw	sp,#20
-2475       00000014      OFST:	set	20
-2478                     ; 353     char key = 0;
-2480                     ; 354     char userInput[4] = {' ', ' ', ' ', ' '};
-2482  050e 96            	ldw	x,sp
-2483  050f 1c000f        	addw	x,#OFST-5
-2484  0512 90ae0022      	ldw	y,#L777_userInput
-2485  0516 a604          	ld	a,#4
-2486  0518 cd0000        	call	c_xymov
-2488                     ; 355     uint8_t index = 0;
-2490  051b 0f13          	clr	(OFST-1,sp)
-2492                     ; 357     uint8_t loggedIn = 0;
-2494  051d 0f0d          	clr	(OFST-7,sp)
-2496                     ; 358     uint32_t loginStartTime = 0;
-2498  051f ae0000        	ldw	x,#0
-2499  0522 1f0b          	ldw	(OFST-9,sp),x
-2500  0524 ae0000        	ldw	x,#0
-2501  0527 1f09          	ldw	(OFST-11,sp),x
-2503                     ; 359     const uint32_t LOGIN_TIMEOUT_MS = 5000;
-2505  0529 ae1388        	ldw	x,#5000
-2506  052c 1f07          	ldw	(OFST-13,sp),x
-2507  052e ae0000        	ldw	x,#0
-2508  0531 1f05          	ldw	(OFST-15,sp),x
-2510                     ; 361     CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
-2512  0533 4f            	clr	a
-2513  0534 cd0000        	call	_CLK_HSIPrescalerConfig
-2515                     ; 363     GPIO_Init(TM_CLK_PORT, TM_CLK_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
-2517  0537 4be0          	push	#224
-2518  0539 4b20          	push	#32
-2519  053b ae5005        	ldw	x,#20485
-2520  053e cd0000        	call	_GPIO_Init
-2522  0541 85            	popw	x
-2523                     ; 364     GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
-2525  0542 4be0          	push	#224
-2526  0544 4b10          	push	#16
-2527  0546 ae5005        	ldw	x,#20485
-2528  0549 cd0000        	call	_GPIO_Init
-2530  054c 85            	popw	x
-2531                     ; 365     GPIO_Init(GPIOE, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
-2533  054d 4b00          	push	#0
-2534  054f 4b10          	push	#16
-2535  0551 ae5014        	ldw	x,#20500
-2536  0554 cd0000        	call	_GPIO_Init
-2538  0557 85            	popw	x
-2539                     ; 367     initKeypad();
-2541  0558 cd0103        	call	_initKeypad
-2543                     ; 368     buzzerInit();
-2545  055b cd0321        	call	_buzzerInit
-2547                     ; 369     init_milis();
-2549  055e cd0000        	call	_init_milis
-2551                     ; 371     for (i = 0; i < 4; i++) {
-2553  0561 0f14          	clr	(OFST+0,sp)
-2555  0563               L3601:
-2556                     ; 372         tm_displayCharacter(i, 0x00);
-2558  0563 7b14          	ld	a,(OFST+0,sp)
-2559  0565 5f            	clrw	x
-2560  0566 95            	ld	xh,a
-2561  0567 cd00be        	call	_tm_displayCharacter
-2563                     ; 371     for (i = 0; i < 4; i++) {
-2565  056a 0c14          	inc	(OFST+0,sp)
-2569  056c 7b14          	ld	a,(OFST+0,sp)
-2570  056e a104          	cp	a,#4
-2571  0570 25f1          	jrult	L3601
-2572                     ; 375     loadPINfromEEPROM();
-2574  0572 cd03ff        	call	_loadPINfromEEPROM
-2576  0575               L1701:
-2577                     ; 378         key = getKey();
-2579  0575 cd013b        	call	_getKey
-2581  0578 6b0e          	ld	(OFST-6,sp),a
-2583                     ; 381         if (GPIO_ReadInputPin(GPIOE, GPIO_PIN_4) == RESET) {
-2585  057a 4b10          	push	#16
-2586  057c ae5014        	ldw	x,#20500
-2587  057f cd0000        	call	_GPIO_ReadInputPin
-2589  0582 5b01          	addw	sp,#1
-2590  0584 4d            	tnz	a
-2591  0585 2634          	jrne	L5701
-2592                     ; 382             factoryResetPIN();
-2594  0587 cd04fe        	call	_factoryResetPIN
-2597  058a               L1011:
-2598                     ; 383             while (GPIO_ReadInputPin(GPIOE, GPIO_PIN_4) == RESET);
-2600  058a 4b10          	push	#16
-2601  058c ae5014        	ldw	x,#20500
-2602  058f cd0000        	call	_GPIO_ReadInputPin
-2604  0592 5b01          	addw	sp,#1
-2605  0594 4d            	tnz	a
-2606  0595 27f3          	jreq	L1011
-2607                     ; 384             index = 0;
-2609  0597 0f13          	clr	(OFST-1,sp)
-2611                     ; 385             for (i = 0; i < 4; i++) {
-2613  0599 0f14          	clr	(OFST+0,sp)
-2615  059b               L5011:
-2616                     ; 386                 userInput[i] = ' ';
-2618  059b 96            	ldw	x,sp
-2619  059c 1c000f        	addw	x,#OFST-5
-2620  059f 9f            	ld	a,xl
-2621  05a0 5e            	swapw	x
-2622  05a1 1b14          	add	a,(OFST+0,sp)
-2623  05a3 2401          	jrnc	L241
-2624  05a5 5c            	incw	x
-2625  05a6               L241:
-2626  05a6 02            	rlwa	x,a
-2627  05a7 a620          	ld	a,#32
-2628  05a9 f7            	ld	(x),a
-2629                     ; 387                 tm_displayCharacter(i, 0x00);
-2631  05aa 7b14          	ld	a,(OFST+0,sp)
-2632  05ac 5f            	clrw	x
-2633  05ad 95            	ld	xh,a
-2634  05ae cd00be        	call	_tm_displayCharacter
-2636                     ; 385             for (i = 0; i < 4; i++) {
-2638  05b1 0c14          	inc	(OFST+0,sp)
-2642  05b3 7b14          	ld	a,(OFST+0,sp)
-2643  05b5 a104          	cp	a,#4
-2644  05b7 25e2          	jrult	L5011
-2645                     ; 389             loggedIn = 0;
-2647  05b9 0f0d          	clr	(OFST-7,sp)
-2649  05bb               L5701:
-2650                     ; 393         if (loggedIn) {
-2652  05bb 0d0d          	tnz	(OFST-7,sp)
-2653  05bd 2603          	jrne	L061
-2654  05bf cc064f        	jp	L3111
-2655  05c2               L061:
-2656                     ; 394             uint32_t now = milis();
-2658  05c2 cd0000        	call	_milis
-2660  05c5 cd0000        	call	c_uitolx
-2662  05c8 96            	ldw	x,sp
-2663  05c9 1c0001        	addw	x,#OFST-19
-2664  05cc cd0000        	call	c_rtol
-2667                     ; 395             if ((now - loginStartTime) >= LOGIN_TIMEOUT_MS) {
-2669  05cf 96            	ldw	x,sp
-2670  05d0 1c0001        	addw	x,#OFST-19
-2671  05d3 cd0000        	call	c_ltor
-2673  05d6 96            	ldw	x,sp
-2674  05d7 1c0009        	addw	x,#OFST-11
-2675  05da cd0000        	call	c_lsub
-2677  05dd 96            	ldw	x,sp
-2678  05de 1c0005        	addw	x,#OFST-15
-2679  05e1 cd0000        	call	c_lcmp
-2681  05e4 2569          	jrult	L3111
-2682                     ; 397                 beepTone(1000, 500);  // dlouhý tón 500ms
-2684  05e6 ae01f4        	ldw	x,#500
-2685  05e9 89            	pushw	x
-2686  05ea ae03e8        	ldw	x,#1000
-2687  05ed cd0336        	call	_beepTone
-2689  05f0 85            	popw	x
-2690                     ; 398                 for (k = 0; k < 2; k++) {
-2692  05f1 0f13          	clr	(OFST-1,sp)
-2694  05f3               L7111:
-2695                     ; 399                     for (j = 0; j < 4; j++) tm_displayCharacter(j, 0xFF);
-2697  05f3 0f14          	clr	(OFST+0,sp)
-2699  05f5               L5211:
-2702  05f5 7b14          	ld	a,(OFST+0,sp)
-2703  05f7 ae00ff        	ldw	x,#255
-2704  05fa 95            	ld	xh,a
-2705  05fb cd00be        	call	_tm_displayCharacter
-2709  05fe 0c14          	inc	(OFST+0,sp)
-2713  0600 7b14          	ld	a,(OFST+0,sp)
-2714  0602 a104          	cp	a,#4
-2715  0604 25ef          	jrult	L5211
-2716                     ; 400                     delay_ms(200);
-2718  0606 ae00c8        	ldw	x,#200
-2719  0609 cd0000        	call	_delay_ms
-2721                     ; 401                     for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
-2723  060c 0f14          	clr	(OFST+0,sp)
-2725  060e               L3311:
-2728  060e 7b14          	ld	a,(OFST+0,sp)
-2729  0610 5f            	clrw	x
-2730  0611 95            	ld	xh,a
-2731  0612 cd00be        	call	_tm_displayCharacter
-2735  0615 0c14          	inc	(OFST+0,sp)
-2739  0617 7b14          	ld	a,(OFST+0,sp)
-2740  0619 a104          	cp	a,#4
-2741  061b 25f1          	jrult	L3311
-2742                     ; 402                     delay_ms(200);
-2744  061d ae00c8        	ldw	x,#200
-2745  0620 cd0000        	call	_delay_ms
-2747                     ; 398                 for (k = 0; k < 2; k++) {
-2749  0623 0c13          	inc	(OFST-1,sp)
-2753  0625 7b13          	ld	a,(OFST-1,sp)
-2754  0627 a102          	cp	a,#2
-2755  0629 25c8          	jrult	L7111
-2756                     ; 404                 loggedIn = 0;
-2758  062b 0f0d          	clr	(OFST-7,sp)
-2760                     ; 405                 index = 0;
-2762  062d 0f13          	clr	(OFST-1,sp)
-2764                     ; 406                 for (i = 0; i < 4; i++) {
-2766  062f 0f14          	clr	(OFST+0,sp)
-2768  0631               L1411:
-2769                     ; 407                     userInput[i] = ' ';
-2771  0631 96            	ldw	x,sp
-2772  0632 1c000f        	addw	x,#OFST-5
-2773  0635 9f            	ld	a,xl
-2774  0636 5e            	swapw	x
-2775  0637 1b14          	add	a,(OFST+0,sp)
-2776  0639 2401          	jrnc	L441
-2777  063b 5c            	incw	x
-2778  063c               L441:
-2779  063c 02            	rlwa	x,a
-2780  063d a620          	ld	a,#32
-2781  063f f7            	ld	(x),a
-2782                     ; 408                     tm_displayCharacter(i, 0x00);
-2784  0640 7b14          	ld	a,(OFST+0,sp)
-2785  0642 5f            	clrw	x
-2786  0643 95            	ld	xh,a
-2787  0644 cd00be        	call	_tm_displayCharacter
-2789                     ; 406                 for (i = 0; i < 4; i++) {
-2791  0647 0c14          	inc	(OFST+0,sp)
-2795  0649 7b14          	ld	a,(OFST+0,sp)
-2796  064b a104          	cp	a,#4
-2797  064d 25e2          	jrult	L1411
-2798  064f               L3111:
-2799                     ; 413         if (key != 0) {
-2801  064f 0d0e          	tnz	(OFST-6,sp)
-2802  0651 2603          	jrne	L261
-2803  0653 cc0575        	jp	L1701
-2804  0656               L261:
-2805                     ; 414             if (key >= '0' && key <= '9') {
-2807  0656 7b0e          	ld	a,(OFST-6,sp)
-2808  0658 a130          	cp	a,#48
-2809  065a 2403          	jruge	L461
-2810  065c cc072b        	jp	L1511
-2811  065f               L461:
-2813  065f 7b0e          	ld	a,(OFST-6,sp)
-2814  0661 a13a          	cp	a,#58
-2815  0663 2503          	jrult	L661
-2816  0665 cc072b        	jp	L1511
-2817  0668               L661:
-2818                     ; 415                 if (index < 4) {
-2820  0668 7b13          	ld	a,(OFST-1,sp)
-2821  066a a104          	cp	a,#4
-2822  066c 2503          	jrult	L071
-2823  066e cc0575        	jp	L1701
-2824  0671               L071:
-2825                     ; 416                     userInput[index] = key;
-2827  0671 96            	ldw	x,sp
-2828  0672 1c000f        	addw	x,#OFST-5
-2829  0675 9f            	ld	a,xl
-2830  0676 5e            	swapw	x
-2831  0677 1b13          	add	a,(OFST-1,sp)
-2832  0679 2401          	jrnc	L641
-2833  067b 5c            	incw	x
-2834  067c               L641:
-2835  067c 02            	rlwa	x,a
-2836  067d 7b0e          	ld	a,(OFST-6,sp)
-2837  067f f7            	ld	(x),a
-2838                     ; 417                     tm_displayCharacter(index, digitToSegment[key - '0']);
-2840  0680 7b0e          	ld	a,(OFST-6,sp)
-2841  0682 5f            	clrw	x
-2842  0683 97            	ld	xl,a
-2843  0684 1d0030        	subw	x,#48
-2844  0687 d60004        	ld	a,(_digitToSegment,x)
-2845  068a 97            	ld	xl,a
-2846  068b 7b13          	ld	a,(OFST-1,sp)
-2847  068d 95            	ld	xh,a
-2848  068e cd00be        	call	_tm_displayCharacter
-2850                     ; 418                     index++;
-2852  0691 0c13          	inc	(OFST-1,sp)
-2854                     ; 420                     if (index == 4) {
-2856  0693 7b13          	ld	a,(OFST-1,sp)
-2857  0695 a104          	cp	a,#4
-2858  0697 2703          	jreq	L271
-2859  0699 cc0575        	jp	L1701
-2860  069c               L271:
-2861                     ; 422                         if (!loggedIn) {
-2863  069c 0d0d          	tnz	(OFST-7,sp)
-2864  069e 2703          	jreq	L471
-2865  06a0 cc0575        	jp	L1701
-2866  06a3               L471:
-2867                     ; 423                             if (comparePIN(userInput, storedPIN)) {
-2869  06a3 ae0000        	ldw	x,#_storedPIN
-2870  06a6 89            	pushw	x
-2871  06a7 96            	ldw	x,sp
-2872  06a8 1c0011        	addw	x,#OFST-3
-2873  06ab cd0494        	call	_comparePIN
-2875  06ae 85            	popw	x
-2876  06af 4d            	tnz	a
-2877  06b0 2750          	jreq	L1611
-2878                     ; 424                                 beepSuccess();
-2880  06b2 cd03b4        	call	_beepSuccess
-2882                     ; 425                                 for (k = 0; k < 2; k++) {
-2884  06b5 0f13          	clr	(OFST-1,sp)
-2886  06b7               L3611:
-2887                     ; 426                                     for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x7F);
-2889  06b7 0f14          	clr	(OFST+0,sp)
-2891  06b9               L1711:
-2894  06b9 7b14          	ld	a,(OFST+0,sp)
-2895  06bb ae007f        	ldw	x,#127
-2896  06be 95            	ld	xh,a
-2897  06bf cd00be        	call	_tm_displayCharacter
-2901  06c2 0c14          	inc	(OFST+0,sp)
-2905  06c4 7b14          	ld	a,(OFST+0,sp)
-2906  06c6 a104          	cp	a,#4
-2907  06c8 25ef          	jrult	L1711
-2908                     ; 427                                     delay_ms(200);
-2910  06ca ae00c8        	ldw	x,#200
-2911  06cd cd0000        	call	_delay_ms
-2913                     ; 428                                     for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
-2915  06d0 0f14          	clr	(OFST+0,sp)
-2917  06d2               L7711:
-2920  06d2 7b14          	ld	a,(OFST+0,sp)
-2921  06d4 5f            	clrw	x
-2922  06d5 95            	ld	xh,a
-2923  06d6 cd00be        	call	_tm_displayCharacter
-2927  06d9 0c14          	inc	(OFST+0,sp)
-2931  06db 7b14          	ld	a,(OFST+0,sp)
-2932  06dd a104          	cp	a,#4
-2933  06df 25f1          	jrult	L7711
-2934                     ; 429                                     delay_ms(200);
-2936  06e1 ae00c8        	ldw	x,#200
-2937  06e4 cd0000        	call	_delay_ms
-2939                     ; 425                                 for (k = 0; k < 2; k++) {
-2941  06e7 0c13          	inc	(OFST-1,sp)
-2945  06e9 7b13          	ld	a,(OFST-1,sp)
-2946  06eb a102          	cp	a,#2
-2947  06ed 25c8          	jrult	L3611
-2948                     ; 431                                 loggedIn = 1;
-2950  06ef a601          	ld	a,#1
-2951  06f1 6b0d          	ld	(OFST-7,sp),a
-2953                     ; 432                                 loginStartTime = milis();
-2955  06f3 cd0000        	call	_milis
-2957  06f6 cd0000        	call	c_uitolx
-2959  06f9 96            	ldw	x,sp
-2960  06fa 1c0009        	addw	x,#OFST-11
-2961  06fd cd0000        	call	c_rtol
-2965  0700 2003          	jra	L5021
-2966  0702               L1611:
-2967                     ; 434                                 beepFail();
-2969  0702 cd03c0        	call	_beepFail
-2971  0705               L5021:
-2972                     ; 437                             index = 0;
-2974  0705 0f13          	clr	(OFST-1,sp)
-2976                     ; 438                             for (j = 0; j < 4; j++) {
-2978  0707 0f14          	clr	(OFST+0,sp)
-2980  0709               L7021:
-2981                     ; 439                                 userInput[j] = ' ';
-2983  0709 96            	ldw	x,sp
-2984  070a 1c000f        	addw	x,#OFST-5
-2985  070d 9f            	ld	a,xl
-2986  070e 5e            	swapw	x
-2987  070f 1b14          	add	a,(OFST+0,sp)
-2988  0711 2401          	jrnc	L051
-2989  0713 5c            	incw	x
-2990  0714               L051:
-2991  0714 02            	rlwa	x,a
-2992  0715 a620          	ld	a,#32
-2993  0717 f7            	ld	(x),a
-2994                     ; 440                                 tm_displayCharacter(j, 0x00);
-2996  0718 7b14          	ld	a,(OFST+0,sp)
-2997  071a 5f            	clrw	x
-2998  071b 95            	ld	xh,a
-2999  071c cd00be        	call	_tm_displayCharacter
-3001                     ; 438                             for (j = 0; j < 4; j++) {
-3003  071f 0c14          	inc	(OFST+0,sp)
-3007  0721 7b14          	ld	a,(OFST+0,sp)
-3008  0723 a104          	cp	a,#4
-3009  0725 25e2          	jrult	L7021
-3010  0727 ac750575      	jpf	L1701
-3011  072b               L1511:
-3012                     ; 445             } else if (key == '*') {
-3014  072b 7b0e          	ld	a,(OFST-6,sp)
-3015  072d a12a          	cp	a,#42
-3016  072f 2623          	jrne	L7121
-3017                     ; 447                 if (index > 0) {
-3019  0731 0d13          	tnz	(OFST-1,sp)
-3020  0733 2603          	jrne	L671
-3021  0735 cc0575        	jp	L1701
-3022  0738               L671:
-3023                     ; 448                     index--;
-3025  0738 0a13          	dec	(OFST-1,sp)
-3027                     ; 449                     userInput[index] = ' ';
-3029  073a 96            	ldw	x,sp
-3030  073b 1c000f        	addw	x,#OFST-5
-3031  073e 9f            	ld	a,xl
-3032  073f 5e            	swapw	x
-3033  0740 1b13          	add	a,(OFST-1,sp)
-3034  0742 2401          	jrnc	L251
-3035  0744 5c            	incw	x
-3036  0745               L251:
-3037  0745 02            	rlwa	x,a
-3038  0746 a620          	ld	a,#32
-3039  0748 f7            	ld	(x),a
-3040                     ; 450                     tm_displayCharacter(index, 0x00);
-3042  0749 7b13          	ld	a,(OFST-1,sp)
-3043  074b 5f            	clrw	x
-3044  074c 95            	ld	xh,a
-3045  074d cd00be        	call	_tm_displayCharacter
-3047  0750 ac750575      	jpf	L1701
-3048  0754               L7121:
-3049                     ; 452             } else if (key == '#') {
-3051  0754 7b0e          	ld	a,(OFST-6,sp)
-3052  0756 a123          	cp	a,#35
-3053  0758 2703          	jreq	L002
-3054  075a cc0575        	jp	L1701
-3055  075d               L002:
-3056                     ; 454                 if (loggedIn && index == 4) {
-3058  075d 0d0d          	tnz	(OFST-7,sp)
-3059  075f 2603          	jrne	L202
-3060  0761 cc0575        	jp	L1701
-3061  0764               L202:
-3063  0764 7b13          	ld	a,(OFST-1,sp)
-3064  0766 a104          	cp	a,#4
-3065  0768 2703          	jreq	L402
-3066  076a cc0575        	jp	L1701
-3067  076d               L402:
-3068                     ; 455                     savePINtoEEPROM(userInput);
-3070  076d 96            	ldw	x,sp
-3071  076e 1c000f        	addw	x,#OFST-5
-3072  0771 cd0460        	call	_savePINtoEEPROM
-3074                     ; 456                     beepSuccess();
-3076  0774 cd03b4        	call	_beepSuccess
-3078                     ; 457                     blinkDisplay(2);  // blikni displej 2x
-3080  0777 a602          	ld	a,#2
-3081  0779 cd04bd        	call	_blinkDisplay
-3083                     ; 460                     for (j = 0; j < 4; j++) {
-3085  077c 0f14          	clr	(OFST+0,sp)
-3087  077e               L1321:
-3088                     ; 461                         storedPIN[j] = userInput[j];
-3090  077e 7b14          	ld	a,(OFST+0,sp)
-3091  0780 5f            	clrw	x
-3092  0781 97            	ld	xl,a
-3093  0782 89            	pushw	x
-3094  0783 96            	ldw	x,sp
-3095  0784 1c0011        	addw	x,#OFST-3
-3096  0787 9f            	ld	a,xl
-3097  0788 5e            	swapw	x
-3098  0789 1b16          	add	a,(OFST+2,sp)
-3099  078b 2401          	jrnc	L451
-3100  078d 5c            	incw	x
-3101  078e               L451:
-3102  078e 02            	rlwa	x,a
-3103  078f f6            	ld	a,(x)
-3104  0790 85            	popw	x
-3105  0791 e700          	ld	(_storedPIN,x),a
-3106                     ; 460                     for (j = 0; j < 4; j++) {
-3108  0793 0c14          	inc	(OFST+0,sp)
-3112  0795 7b14          	ld	a,(OFST+0,sp)
-3113  0797 a104          	cp	a,#4
-3114  0799 25e3          	jrult	L1321
-3115                     ; 465                     loggedIn = 0;
-3117  079b 0f0d          	clr	(OFST-7,sp)
-3119                     ; 466                     index = 0;
-3121  079d 0f13          	clr	(OFST-1,sp)
-3123                     ; 467                     for (j = 0; j < 4; j++) {
-3125  079f 0f14          	clr	(OFST+0,sp)
-3127  07a1               L7321:
-3128                     ; 468                         userInput[j] = ' ';
-3130  07a1 96            	ldw	x,sp
-3131  07a2 1c000f        	addw	x,#OFST-5
-3132  07a5 9f            	ld	a,xl
-3133  07a6 5e            	swapw	x
-3134  07a7 1b14          	add	a,(OFST+0,sp)
-3135  07a9 2401          	jrnc	L651
-3136  07ab 5c            	incw	x
-3137  07ac               L651:
-3138  07ac 02            	rlwa	x,a
-3139  07ad a620          	ld	a,#32
-3140  07af f7            	ld	(x),a
-3141                     ; 469                         tm_displayCharacter(j, 0x00);
-3143  07b0 7b14          	ld	a,(OFST+0,sp)
-3144  07b2 5f            	clrw	x
-3145  07b3 95            	ld	xh,a
-3146  07b4 cd00be        	call	_tm_displayCharacter
-3148                     ; 467                     for (j = 0; j < 4; j++) {
-3150  07b7 0c14          	inc	(OFST+0,sp)
-3154  07b9 7b14          	ld	a,(OFST+0,sp)
-3155  07bb a104          	cp	a,#4
-3156  07bd 25e2          	jrult	L7321
-3157  07bf ac750575      	jpf	L1701
-3192                     ; 482 void assert_failed(uint8_t* file, uint32_t line) {
-3193                     	switch	.text
-3194  07c3               _assert_failed:
-3198  07c3               L3621:
-3199                     ; 483     while (1);
-3201  07c3 20fe          	jra	L3621
-3246                     	xdef	_main
-3247                     	xdef	_factoryResetPIN
-3248                     	xdef	_blinkDisplay
-3249                     	xdef	_comparePIN
-3250                     	xdef	_savePINtoEEPROM
-3251                     	xdef	_loadPINfromEEPROM
-3252                     	xdef	_EEPROM_WriteByte
-3253                     	xdef	_EEPROM_ReadByte
-3254                     	xdef	_digitToSegment
-3255                     	xdef	_beepTone
-3256                     	xdef	_beepFail
-3257                     	xdef	_beepSuccess
-3258                     	xdef	_buzzerInit
-3259                     	xdef	_getKey
-3260                     	xdef	_initKeypad
-3261                     	xdef	_delay_us
-3262                     	xdef	_tm_displayCharacter
-3263                     	xdef	_tm_writeByte
-3264                     	xdef	_tm_stop
-3265                     	xdef	_tm_start
-3266                     	xdef	_setCLK
-3267                     	xdef	_setDIO
-3268                     	switch	.ubsct
-3269  0000               _storedPIN:
-3270  0000 00000000      	ds.b	4
-3271                     	xdef	_storedPIN
-3272                     	xdef	_defaultPIN
-3273                     	xref	_init_milis
-3274                     	xref	_delay_ms
-3275                     	xref	_milis
-3276                     	xdef	_assert_failed
-3277                     	xref	_GPIO_ReadInputPin
-3278                     	xref	_GPIO_WriteLow
-3279                     	xref	_GPIO_WriteHigh
-3280                     	xref	_GPIO_Init
-3281                     	xref	_FLASH_ProgramByte
-3282                     	xref	_FLASH_Lock
-3283                     	xref	_FLASH_Unlock
-3284                     	xref	_CLK_HSIPrescalerConfig
-3285                     	xref.b	c_lreg
-3286                     	xref.b	c_x
-3287                     	xref.b	c_y
-3307                     	xref	c_lsub
-3308                     	xref	c_ludv
-3309                     	xref	c_umul
-3310                     	xref	c_ldiv
-3311                     	xref	c_rtol
-3312                     	xref	c_uitolx
-3313                     	xref	c_bmulx
-3314                     	xref	c_lcmp
-3315                     	xref	c_ltor
-3316                     	xref	c_lgadc
-3317                     	xref	c_xymov
-3318                     	end
+1629                     ; 267 void beepAndBlink(uint16_t frequency, uint16_t duration_ms, GPIO_TypeDef* port, GPIO_Pin_TypeDef pin) {
+1630                     	switch	.text
+1631  03b4               _beepAndBlink:
+1633  03b4 89            	pushw	x
+1634  03b5 520a          	subw	sp,#10
+1635       0000000a      OFST:	set	10
+1638                     ; 268     uint16_t halfPeriod_us = 1000000UL / (2 * frequency);  // délka pùl periody v µs
+1640  03b7 58            	sllw	x
+1641  03b8 cd0000        	call	c_uitolx
+1643  03bb 96            	ldw	x,sp
+1644  03bc 1c0001        	addw	x,#OFST-9
+1645  03bf cd0000        	call	c_rtol
+1648  03c2 ae4240        	ldw	x,#16960
+1649  03c5 bf02          	ldw	c_lreg+2,x
+1650  03c7 ae000f        	ldw	x,#15
+1651  03ca bf00          	ldw	c_lreg,x
+1652  03cc 96            	ldw	x,sp
+1653  03cd 1c0001        	addw	x,#OFST-9
+1654  03d0 cd0000        	call	c_ludv
+1656  03d3 be02          	ldw	x,c_lreg+2
+1657  03d5 1f05          	ldw	(OFST-5,sp),x
+1659                     ; 269     uint32_t startTime = milis();
+1661  03d7 cd0000        	call	_milis
+1663  03da cd0000        	call	c_uitolx
+1665  03dd 96            	ldw	x,sp
+1666  03de 1c0007        	addw	x,#OFST-3
+1667  03e1 cd0000        	call	c_rtol
+1671  03e4 2016          	jra	L145
+1672  03e6               L535:
+1673                     ; 272         beepTone(2000,400);
+1675  03e6 ae0190        	ldw	x,#400
+1676  03e9 89            	pushw	x
+1677  03ea ae07d0        	ldw	x,#2000
+1678  03ed cd0336        	call	_beepTone
+1680  03f0 85            	popw	x
+1681                     ; 273         blinkLED(1, '');            
+1683  03f1 ae0100        	ldw	x,#256
+1684  03f4 cd05b4        	call	_blinkLED
+1686                     ; 274         delay_us(halfPeriod_us);
+1688  03f7 1e05          	ldw	x,(OFST-5,sp)
+1689  03f9 cd00e4        	call	_delay_us
+1691  03fc               L145:
+1692                     ; 271     while ((milis() - startTime) < duration_ms) {
+1694  03fc cd0000        	call	_milis
+1696  03ff cd0000        	call	c_uitolx
+1698  0402 96            	ldw	x,sp
+1699  0403 1c0007        	addw	x,#OFST-3
+1700  0406 cd0000        	call	c_lsub
+1702  0409 96            	ldw	x,sp
+1703  040a 1c0001        	addw	x,#OFST-9
+1704  040d cd0000        	call	c_rtol
+1707  0410 1e0f          	ldw	x,(OFST+5,sp)
+1708  0412 cd0000        	call	c_uitolx
+1710  0415 96            	ldw	x,sp
+1711  0416 1c0001        	addw	x,#OFST-9
+1712  0419 cd0000        	call	c_lcmp
+1714  041c 22c8          	jrugt	L535
+1715                     ; 276 }
+1718  041e 5b0c          	addw	sp,#12
+1719  0420 81            	ret
+1792                     ; 280 void beepSuccess(void) {
+1793                     	switch	.text
+1794  0421               _beepSuccess:
+1796  0421 5209          	subw	sp,#9
+1797       00000009      OFST:	set	9
+1800                     ; 281     uint16_t freq = 3000;
+1802  0423 ae0bb8        	ldw	x,#3000
+1803  0426 1f01          	ldw	(OFST-8,sp),x
+1805                     ; 282     uint16_t totalDuration = 300;  
+1807  0428 ae012c        	ldw	x,#300
+1808  042b 1f03          	ldw	(OFST-6,sp),x
+1810                     ; 283     uint16_t chunkDuration = 50;   
+1812  042d ae0032        	ldw	x,#50
+1813  0430 1f05          	ldw	(OFST-4,sp),x
+1815                     ; 284     uint16_t elapsed = 0;
+1817  0432 5f            	clrw	x
+1818  0433 1f07          	ldw	(OFST-2,sp),x
+1820                     ; 285     uint8_t ledOn = 0;
+1822  0435 0f09          	clr	(OFST+0,sp)
+1825  0437 202e          	jra	L706
+1826  0439               L306:
+1827                     ; 288         if (ledOn) {
+1829  0439 0d09          	tnz	(OFST+0,sp)
+1830  043b 270d          	jreq	L316
+1831                     ; 289             GPIO_WriteLow(GPIOE, GPIO_PIN_5);
+1833  043d 4b20          	push	#32
+1834  043f ae5014        	ldw	x,#20500
+1835  0442 cd0000        	call	_GPIO_WriteLow
+1837  0445 84            	pop	a
+1838                     ; 290             ledOn = 0;
+1840  0446 0f09          	clr	(OFST+0,sp)
+1843  0448 200d          	jra	L516
+1844  044a               L316:
+1845                     ; 292             GPIO_WriteHigh(GPIOE, GPIO_PIN_5);
+1847  044a 4b20          	push	#32
+1848  044c ae5014        	ldw	x,#20500
+1849  044f cd0000        	call	_GPIO_WriteHigh
+1851  0452 84            	pop	a
+1852                     ; 293             ledOn = 1;
+1854  0453 a601          	ld	a,#1
+1855  0455 6b09          	ld	(OFST+0,sp),a
+1857  0457               L516:
+1858                     ; 297         beepTone(freq, chunkDuration);
+1860  0457 1e05          	ldw	x,(OFST-4,sp)
+1861  0459 89            	pushw	x
+1862  045a 1e03          	ldw	x,(OFST-6,sp)
+1863  045c cd0336        	call	_beepTone
+1865  045f 85            	popw	x
+1866                     ; 299         elapsed += chunkDuration;
+1868  0460 1e07          	ldw	x,(OFST-2,sp)
+1869  0462 72fb05        	addw	x,(OFST-4,sp)
+1870  0465 1f07          	ldw	(OFST-2,sp),x
+1872  0467               L706:
+1873                     ; 287     while (elapsed < totalDuration) {
+1875  0467 1e07          	ldw	x,(OFST-2,sp)
+1876  0469 1303          	cpw	x,(OFST-6,sp)
+1877  046b 25cc          	jrult	L306
+1878                     ; 303     GPIO_WriteLow(GPIOC, GPIO_PIN_4);
+1880  046d 4b10          	push	#16
+1881  046f ae500a        	ldw	x,#20490
+1882  0472 cd0000        	call	_GPIO_WriteLow
+1884  0475 84            	pop	a
+1885                     ; 304 }
+1888  0476 5b09          	addw	sp,#9
+1889  0478 81            	ret
+1913                     ; 306 void beepFail(void) {
+1914                     	switch	.text
+1915  0479               _beepFail:
+1919                     ; 307     beepTone(500, 100);
+1921  0479 ae0064        	ldw	x,#100
+1922  047c 89            	pushw	x
+1923  047d ae01f4        	ldw	x,#500
+1924  0480 cd0336        	call	_beepTone
+1926  0483 85            	popw	x
+1927                     ; 308 }
+1930  0484 81            	ret
+1964                     ; 311 uint8_t EEPROM_ReadByte(uint16_t addr) {
+1965                     	switch	.text
+1966  0485               _EEPROM_ReadByte:
+1970                     ; 313     return *((uint8_t*)addr);
+1972  0485 f6            	ld	a,(x)
+1975  0486 81            	ret
+2021                     ; 317 void EEPROM_WriteByte(uint16_t addr, uint8_t data) {
+2022                     	switch	.text
+2023  0487               _EEPROM_WriteByte:
+2025  0487 89            	pushw	x
+2026       00000000      OFST:	set	0
+2029                     ; 319     FLASH_Unlock(FLASH_MEMTYPE_DATA);
+2031  0488 a6f7          	ld	a,#247
+2032  048a cd0000        	call	_FLASH_Unlock
+2034                     ; 320     FLASH_ProgramByte(addr, data);
+2036  048d 7b05          	ld	a,(OFST+5,sp)
+2037  048f 88            	push	a
+2038  0490 1e02          	ldw	x,(OFST+2,sp)
+2039  0492 cd0000        	call	c_uitolx
+2041  0495 be02          	ldw	x,c_lreg+2
+2042  0497 89            	pushw	x
+2043  0498 be00          	ldw	x,c_lreg
+2044  049a 89            	pushw	x
+2045  049b cd0000        	call	_FLASH_ProgramByte
+2047  049e 5b05          	addw	sp,#5
+2048                     ; 321     FLASH_Lock(FLASH_MEMTYPE_DATA);
+2050  04a0 a6f7          	ld	a,#247
+2051  04a2 cd0000        	call	_FLASH_Lock
+2053                     ; 322 }
+2056  04a5 85            	popw	x
+2057  04a6 81            	ret
+2104                     ; 325 void loadPINfromEEPROM(void) {
+2105                     	switch	.text
+2106  04a7               _loadPINfromEEPROM:
+2108  04a7 89            	pushw	x
+2109       00000002      OFST:	set	2
+2112                     ; 327     uint8_t valid = 1;
+2114  04a8 a601          	ld	a,#1
+2115  04aa 6b01          	ld	(OFST-1,sp),a
+2117                     ; 328     for (i = 0; i < 4; i++) {
+2119  04ac 0f02          	clr	(OFST+0,sp)
+2121  04ae               L117:
+2122                     ; 329         storedPIN[i] = EEPROM_ReadByte(EEPROM_PIN_ADDR + i);
+2124  04ae 7b02          	ld	a,(OFST+0,sp)
+2125  04b0 5f            	clrw	x
+2126  04b1 97            	ld	xl,a
+2127  04b2 89            	pushw	x
+2128  04b3 7b04          	ld	a,(OFST+2,sp)
+2129  04b5 5f            	clrw	x
+2130  04b6 97            	ld	xl,a
+2131  04b7 1c4000        	addw	x,#16384
+2132  04ba adc9          	call	_EEPROM_ReadByte
+2134  04bc 85            	popw	x
+2135  04bd e700          	ld	(_storedPIN,x),a
+2136                     ; 331         if (storedPIN[i] < '0' || storedPIN[i] > '9') {
+2138  04bf 7b02          	ld	a,(OFST+0,sp)
+2139  04c1 5f            	clrw	x
+2140  04c2 97            	ld	xl,a
+2141  04c3 e600          	ld	a,(_storedPIN,x)
+2142  04c5 a130          	cp	a,#48
+2143  04c7 250a          	jrult	L127
+2145  04c9 7b02          	ld	a,(OFST+0,sp)
+2146  04cb 5f            	clrw	x
+2147  04cc 97            	ld	xl,a
+2148  04cd e600          	ld	a,(_storedPIN,x)
+2149  04cf a13a          	cp	a,#58
+2150  04d1 2502          	jrult	L717
+2151  04d3               L127:
+2152                     ; 332             valid = 0;
+2154  04d3 0f01          	clr	(OFST-1,sp)
+2156  04d5               L717:
+2157                     ; 328     for (i = 0; i < 4; i++) {
+2159  04d5 0c02          	inc	(OFST+0,sp)
+2163  04d7 7b02          	ld	a,(OFST+0,sp)
+2164  04d9 a104          	cp	a,#4
+2165  04db 25d1          	jrult	L117
+2166                     ; 335     if (!valid) {
+2168  04dd 0d01          	tnz	(OFST-1,sp)
+2169  04df 2625          	jrne	L327
+2170                     ; 337         for (i = 0; i < 4; i++) {
+2172  04e1 0f02          	clr	(OFST+0,sp)
+2174  04e3               L527:
+2175                     ; 338             storedPIN[i] = defaultPIN[i];
+2177  04e3 7b02          	ld	a,(OFST+0,sp)
+2178  04e5 5f            	clrw	x
+2179  04e6 97            	ld	xl,a
+2180  04e7 d60000        	ld	a,(_defaultPIN,x)
+2181  04ea e700          	ld	(_storedPIN,x),a
+2182                     ; 339             EEPROM_WriteByte(EEPROM_PIN_ADDR + i, defaultPIN[i]);
+2184  04ec 7b02          	ld	a,(OFST+0,sp)
+2185  04ee 5f            	clrw	x
+2186  04ef 97            	ld	xl,a
+2187  04f0 d60000        	ld	a,(_defaultPIN,x)
+2188  04f3 88            	push	a
+2189  04f4 7b03          	ld	a,(OFST+1,sp)
+2190  04f6 5f            	clrw	x
+2191  04f7 97            	ld	xl,a
+2192  04f8 1c4000        	addw	x,#16384
+2193  04fb ad8a          	call	_EEPROM_WriteByte
+2195  04fd 84            	pop	a
+2196                     ; 337         for (i = 0; i < 4; i++) {
+2198  04fe 0c02          	inc	(OFST+0,sp)
+2202  0500 7b02          	ld	a,(OFST+0,sp)
+2203  0502 a104          	cp	a,#4
+2204  0504 25dd          	jrult	L527
+2205  0506               L327:
+2206                     ; 342 }
+2209  0506 85            	popw	x
+2210  0507 81            	ret
+2256                     ; 345 void savePINtoEEPROM(const char* newPIN) {
+2257                     	switch	.text
+2258  0508               _savePINtoEEPROM:
+2260  0508 89            	pushw	x
+2261  0509 88            	push	a
+2262       00000001      OFST:	set	1
+2265                     ; 347     for (i = 0; i < 4; i++) {
+2267  050a 0f01          	clr	(OFST+0,sp)
+2269  050c               L557:
+2270                     ; 348         storedPIN[i] = newPIN[i];
+2272  050c 7b01          	ld	a,(OFST+0,sp)
+2273  050e 5f            	clrw	x
+2274  050f 97            	ld	xl,a
+2275  0510 7b01          	ld	a,(OFST+0,sp)
+2276  0512 905f          	clrw	y
+2277  0514 9097          	ld	yl,a
+2278  0516 72f902        	addw	y,(OFST+1,sp)
+2279  0519 90f6          	ld	a,(y)
+2280  051b e700          	ld	(_storedPIN,x),a
+2281                     ; 349         EEPROM_WriteByte(EEPROM_PIN_ADDR + i, newPIN[i]);
+2283  051d 7b01          	ld	a,(OFST+0,sp)
+2284  051f 5f            	clrw	x
+2285  0520 97            	ld	xl,a
+2286  0521 72fb02        	addw	x,(OFST+1,sp)
+2287  0524 f6            	ld	a,(x)
+2288  0525 88            	push	a
+2289  0526 7b02          	ld	a,(OFST+1,sp)
+2290  0528 5f            	clrw	x
+2291  0529 97            	ld	xl,a
+2292  052a 1c4000        	addw	x,#16384
+2293  052d cd0487        	call	_EEPROM_WriteByte
+2295  0530 84            	pop	a
+2296                     ; 347     for (i = 0; i < 4; i++) {
+2298  0531 0c01          	inc	(OFST+0,sp)
+2302  0533 7b01          	ld	a,(OFST+0,sp)
+2303  0535 a104          	cp	a,#4
+2304  0537 25d3          	jrult	L557
+2305                     ; 351 }
+2308  0539 5b03          	addw	sp,#3
+2309  053b 81            	ret
+2363                     ; 354 uint8_t comparePIN(const char* a, const char* b) {
+2364                     	switch	.text
+2365  053c               _comparePIN:
+2367  053c 89            	pushw	x
+2368  053d 88            	push	a
+2369       00000001      OFST:	set	1
+2372                     ; 356     for (i = 0; i < 4; i++) {
+2374  053e 0f01          	clr	(OFST+0,sp)
+2376  0540               L1101:
+2377                     ; 357         if (a[i] != b[i]) return 0;
+2379  0540 7b01          	ld	a,(OFST+0,sp)
+2380  0542 5f            	clrw	x
+2381  0543 97            	ld	xl,a
+2382  0544 72fb06        	addw	x,(OFST+5,sp)
+2383  0547 7b01          	ld	a,(OFST+0,sp)
+2384  0549 905f          	clrw	y
+2385  054b 9097          	ld	yl,a
+2386  054d 72f902        	addw	y,(OFST+1,sp)
+2387  0550 90f6          	ld	a,(y)
+2388  0552 f1            	cp	a,(x)
+2389  0553 2703          	jreq	L7101
+2392  0555 4f            	clr	a
+2394  0556 200a          	jra	L431
+2395  0558               L7101:
+2396                     ; 356     for (i = 0; i < 4; i++) {
+2398  0558 0c01          	inc	(OFST+0,sp)
+2402  055a 7b01          	ld	a,(OFST+0,sp)
+2403  055c a104          	cp	a,#4
+2404  055e 25e0          	jrult	L1101
+2405                     ; 359     return 1;
+2407  0560 a601          	ld	a,#1
+2409  0562               L431:
+2411  0562 5b03          	addw	sp,#3
+2412  0564 81            	ret
+2466                     ; 363 void blinkDisplay(uint8_t times) {
+2467                     	switch	.text
+2468  0565               _blinkDisplay:
+2470  0565 88            	push	a
+2471  0566 89            	pushw	x
+2472       00000002      OFST:	set	2
+2475                     ; 365     for (i = 0; i < times; i++) {
+2477  0567 0f01          	clr	(OFST-1,sp)
+2480  0569 2032          	jra	L3501
+2481  056b               L7401:
+2482                     ; 366         for (j = 0; j < 4; j++) {
+2484  056b 0f02          	clr	(OFST+0,sp)
+2486  056d               L7501:
+2487                     ; 367             tm_displayCharacter(j, 0x7F); 
+2489  056d 7b02          	ld	a,(OFST+0,sp)
+2490  056f ae007f        	ldw	x,#127
+2491  0572 95            	ld	xh,a
+2492  0573 cd00be        	call	_tm_displayCharacter
+2494                     ; 366         for (j = 0; j < 4; j++) {
+2496  0576 0c02          	inc	(OFST+0,sp)
+2500  0578 7b02          	ld	a,(OFST+0,sp)
+2501  057a a104          	cp	a,#4
+2502  057c 25ef          	jrult	L7501
+2503                     ; 369         delay_us(300000); 
+2505  057e ae93e0        	ldw	x,#37856
+2506  0581 cd00e4        	call	_delay_us
+2508                     ; 371         for (j = 0; j < 4; j++) {
+2510  0584 0f02          	clr	(OFST+0,sp)
+2512  0586               L5601:
+2513                     ; 372             tm_displayCharacter(j, 0x00);
+2515  0586 7b02          	ld	a,(OFST+0,sp)
+2516  0588 5f            	clrw	x
+2517  0589 95            	ld	xh,a
+2518  058a cd00be        	call	_tm_displayCharacter
+2520                     ; 371         for (j = 0; j < 4; j++) {
+2522  058d 0c02          	inc	(OFST+0,sp)
+2526  058f 7b02          	ld	a,(OFST+0,sp)
+2527  0591 a104          	cp	a,#4
+2528  0593 25f1          	jrult	L5601
+2529                     ; 374         delay_us(300000);
+2531  0595 ae93e0        	ldw	x,#37856
+2532  0598 cd00e4        	call	_delay_us
+2534                     ; 365     for (i = 0; i < times; i++) {
+2536  059b 0c01          	inc	(OFST-1,sp)
+2538  059d               L3501:
+2541  059d 7b01          	ld	a,(OFST-1,sp)
+2542  059f 1103          	cp	a,(OFST+1,sp)
+2543  05a1 25c8          	jrult	L7401
+2544                     ; 376 }
+2547  05a3 5b03          	addw	sp,#3
+2548  05a5 81            	ret
+2575                     ; 380 void factoryResetPIN(void) {
+2576                     	switch	.text
+2577  05a6               _factoryResetPIN:
+2581                     ; 381     savePINtoEEPROM(defaultPIN);
+2583  05a6 ae0000        	ldw	x,#_defaultPIN
+2584  05a9 cd0508        	call	_savePINtoEEPROM
+2586                     ; 382     beepSuccess();
+2588  05ac cd0421        	call	_beepSuccess
+2590                     ; 383     blinkDisplay(2); 
+2592  05af a602          	ld	a,#2
+2593  05b1 adb2          	call	_blinkDisplay
+2595                     ; 384 }
+2598  05b3 81            	ret
+2653                     ; 386 void blinkLED(uint8_t times, char color){
+2654                     	switch	.text
+2655  05b4               _blinkLED:
+2657  05b4 89            	pushw	x
+2658  05b5 88            	push	a
+2659       00000001      OFST:	set	1
+2662                     ; 388 			if (color == 'r'){
+2664  05b6 9f            	ld	a,xl
+2665  05b7 a172          	cp	a,#114
+2666  05b9 2627          	jrne	L1311
+2667                     ; 389 				for (i = 0; i < times; i++) {
+2669  05bb 0f01          	clr	(OFST+0,sp)
+2672  05bd 201a          	jra	L7311
+2673  05bf               L3311:
+2674                     ; 390 					GPIO_WriteHigh(GPIOC, GPIO_PIN_4); 
+2676  05bf 4b10          	push	#16
+2677  05c1 ae500a        	ldw	x,#20490
+2678  05c4 cd0000        	call	_GPIO_WriteHigh
+2680  05c7 84            	pop	a
+2681                     ; 391 					delay_ms(250);
+2683  05c8 ae00fa        	ldw	x,#250
+2684  05cb cd0000        	call	_delay_ms
+2686                     ; 392 					GPIO_WriteLow(GPIOC, GPIO_PIN_4);  
+2688  05ce 4b10          	push	#16
+2689  05d0 ae500a        	ldw	x,#20490
+2690  05d3 cd0000        	call	_GPIO_WriteLow
+2692  05d6 84            	pop	a
+2693                     ; 389 				for (i = 0; i < times; i++) {
+2695  05d7 0c01          	inc	(OFST+0,sp)
+2697  05d9               L7311:
+2700  05d9 7b01          	ld	a,(OFST+0,sp)
+2701  05db 1102          	cp	a,(OFST+1,sp)
+2702  05dd 25e0          	jrult	L3311
+2704  05df               L3411:
+2705                     ; 404 }
+2708  05df 5b03          	addw	sp,#3
+2709  05e1 81            	ret
+2710  05e2               L1311:
+2711                     ; 396 					for (i = 0; i < times; i++) {
+2713  05e2 0f01          	clr	(OFST+0,sp)
+2716  05e4 2020          	jra	L1511
+2717  05e6               L5411:
+2718                     ; 397 						GPIO_WriteHigh(GPIOE, GPIO_PIN_5);
+2720  05e6 4b20          	push	#32
+2721  05e8 ae5014        	ldw	x,#20500
+2722  05eb cd0000        	call	_GPIO_WriteHigh
+2724  05ee 84            	pop	a
+2725                     ; 398 						delay_ms(500);
+2727  05ef ae01f4        	ldw	x,#500
+2728  05f2 cd0000        	call	_delay_ms
+2730                     ; 399 						GPIO_WriteLow(GPIOE, GPIO_PIN_5);
+2732  05f5 4b20          	push	#32
+2733  05f7 ae5014        	ldw	x,#20500
+2734  05fa cd0000        	call	_GPIO_WriteLow
+2736  05fd 84            	pop	a
+2737                     ; 400 						delay_ms(500);
+2739  05fe ae01f4        	ldw	x,#500
+2740  0601 cd0000        	call	_delay_ms
+2742                     ; 396 					for (i = 0; i < times; i++) {
+2744  0604 0c01          	inc	(OFST+0,sp)
+2746  0606               L1511:
+2749  0606 7b01          	ld	a,(OFST+0,sp)
+2750  0608 1102          	cp	a,(OFST+1,sp)
+2751  060a 25da          	jrult	L5411
+2752  060c 20d1          	jra	L3411
+2809                     ; 407 void logoutSignal(void) {
+2810                     	switch	.text
+2811  060e               _logoutSignal:
+2813  060e 89            	pushw	x
+2814       00000002      OFST:	set	2
+2817                     ; 412     for (i = 0; i < 2; i++) {
+2819  060f 0f02          	clr	(OFST+0,sp)
+2821  0611               L3021:
+2822                     ; 413         beepTone(1000, 100);
+2824  0611 ae0064        	ldw	x,#100
+2825  0614 89            	pushw	x
+2826  0615 ae03e8        	ldw	x,#1000
+2827  0618 cd0336        	call	_beepTone
+2829  061b 85            	popw	x
+2830                     ; 414         delay_ms(100);
+2832  061c ae0064        	ldw	x,#100
+2833  061f cd0000        	call	_delay_ms
+2835                     ; 412     for (i = 0; i < 2; i++) {
+2837  0622 0c02          	inc	(OFST+0,sp)
+2841  0624 7b02          	ld	a,(OFST+0,sp)
+2842  0626 a102          	cp	a,#2
+2843  0628 25e7          	jrult	L3021
+2844                     ; 417     for (i = 0; i < 2; i++) {
+2846  062a 0f02          	clr	(OFST+0,sp)
+2848  062c               L1121:
+2849                     ; 418         GPIO_WriteHigh(GPIOC, GPIO_PIN_4);
+2851  062c 4b10          	push	#16
+2852  062e ae500a        	ldw	x,#20490
+2853  0631 cd0000        	call	_GPIO_WriteHigh
+2855  0634 84            	pop	a
+2856                     ; 419         delay_ms(200);
+2858  0635 ae00c8        	ldw	x,#200
+2859  0638 cd0000        	call	_delay_ms
+2861                     ; 420         GPIO_WriteLow(GPIOC, GPIO_PIN_4);
+2863  063b 4b10          	push	#16
+2864  063d ae500a        	ldw	x,#20490
+2865  0640 cd0000        	call	_GPIO_WriteLow
+2867  0643 84            	pop	a
+2868                     ; 421         delay_ms(200);
+2870  0644 ae00c8        	ldw	x,#200
+2871  0647 cd0000        	call	_delay_ms
+2873                     ; 417     for (i = 0; i < 2; i++) {
+2875  064a 0c02          	inc	(OFST+0,sp)
+2879  064c 7b02          	ld	a,(OFST+0,sp)
+2880  064e a102          	cp	a,#2
+2881  0650 25da          	jrult	L1121
+2882                     ; 424     for (k = 0; k < 2; k++) {
+2884  0652 0f01          	clr	(OFST-1,sp)
+2886  0654               L7121:
+2887                     ; 425         for (j = 0; j < 4; j++) tm_displayCharacter(j, 0xFF);
+2889  0654 0f02          	clr	(OFST+0,sp)
+2891  0656               L5221:
+2894  0656 7b02          	ld	a,(OFST+0,sp)
+2895  0658 ae00ff        	ldw	x,#255
+2896  065b 95            	ld	xh,a
+2897  065c cd00be        	call	_tm_displayCharacter
+2901  065f 0c02          	inc	(OFST+0,sp)
+2905  0661 7b02          	ld	a,(OFST+0,sp)
+2906  0663 a104          	cp	a,#4
+2907  0665 25ef          	jrult	L5221
+2908                     ; 426         delay_ms(200);
+2910  0667 ae00c8        	ldw	x,#200
+2911  066a cd0000        	call	_delay_ms
+2913                     ; 427         for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
+2915  066d 0f02          	clr	(OFST+0,sp)
+2917  066f               L3321:
+2920  066f 7b02          	ld	a,(OFST+0,sp)
+2921  0671 5f            	clrw	x
+2922  0672 95            	ld	xh,a
+2923  0673 cd00be        	call	_tm_displayCharacter
+2927  0676 0c02          	inc	(OFST+0,sp)
+2931  0678 7b02          	ld	a,(OFST+0,sp)
+2932  067a a104          	cp	a,#4
+2933  067c 25f1          	jrult	L3321
+2934                     ; 428         delay_ms(200);
+2936  067e ae00c8        	ldw	x,#200
+2937  0681 cd0000        	call	_delay_ms
+2939                     ; 424     for (k = 0; k < 2; k++) {
+2941  0684 0c01          	inc	(OFST-1,sp)
+2945  0686 7b01          	ld	a,(OFST-1,sp)
+2946  0688 a102          	cp	a,#2
+2947  068a 25c8          	jrult	L7121
+2948                     ; 430 }
+2951  068c 85            	popw	x
+2952  068d 81            	ret
+2955                     	switch	.const
+2956  0022               L1421_userInput:
+2957  0022 20            	dc.b	32
+2958  0023 20            	dc.b	32
+2959  0024 20            	dc.b	32
+2960  0025 20            	dc.b	32
+3085                     ; 433 void main(void) {
+3086                     	switch	.text
+3087  068e               _main:
+3089  068e 5214          	subw	sp,#20
+3090       00000014      OFST:	set	20
+3093                     ; 434     char key = 0;
+3095                     ; 435     char userInput[4] = {' ', ' ', ' ', ' '};
+3097  0690 96            	ldw	x,sp
+3098  0691 1c000f        	addw	x,#OFST-5
+3099  0694 90ae0022      	ldw	y,#L1421_userInput
+3100  0698 a604          	ld	a,#4
+3101  069a cd0000        	call	c_xymov
+3103                     ; 436     uint8_t index = 0;
+3105  069d 0f13          	clr	(OFST-1,sp)
+3107                     ; 438     uint8_t loggedIn = 0;
+3109  069f 0f0d          	clr	(OFST-7,sp)
+3111                     ; 439     uint32_t loginStartTime = 0;
+3113  06a1 ae0000        	ldw	x,#0
+3114  06a4 1f0b          	ldw	(OFST-9,sp),x
+3115  06a6 ae0000        	ldw	x,#0
+3116  06a9 1f09          	ldw	(OFST-11,sp),x
+3118                     ; 440     const uint32_t LOGIN_TIMEOUT_MS = 5000;
+3120  06ab ae1388        	ldw	x,#5000
+3121  06ae 1f07          	ldw	(OFST-13,sp),x
+3122  06b0 ae0000        	ldw	x,#0
+3123  06b3 1f05          	ldw	(OFST-15,sp),x
+3125                     ; 442     CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
+3127  06b5 4f            	clr	a
+3128  06b6 cd0000        	call	_CLK_HSIPrescalerConfig
+3130                     ; 444     GPIO_Init(TM_CLK_PORT, TM_CLK_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+3132  06b9 4be0          	push	#224
+3133  06bb 4b20          	push	#32
+3134  06bd ae5005        	ldw	x,#20485
+3135  06c0 cd0000        	call	_GPIO_Init
+3137  06c3 85            	popw	x
+3138                     ; 445     GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+3140  06c4 4be0          	push	#224
+3141  06c6 4b10          	push	#16
+3142  06c8 ae5005        	ldw	x,#20485
+3143  06cb cd0000        	call	_GPIO_Init
+3145  06ce 85            	popw	x
+3146                     ; 446     GPIO_Init(GPIOE, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
+3148  06cf 4b00          	push	#0
+3149  06d1 4b10          	push	#16
+3150  06d3 ae5014        	ldw	x,#20500
+3151  06d6 cd0000        	call	_GPIO_Init
+3153  06d9 85            	popw	x
+3154                     ; 449 		GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_OUT_PP_LOW_FAST); // èervená LED
+3156  06da 4be0          	push	#224
+3157  06dc 4b10          	push	#16
+3158  06de ae500a        	ldw	x,#20490
+3159  06e1 cd0000        	call	_GPIO_Init
+3161  06e4 85            	popw	x
+3162                     ; 450 		GPIO_Init(GPIOE, GPIO_PIN_5, GPIO_MODE_OUT_PP_LOW_FAST); // zelená LED
+3164  06e5 4be0          	push	#224
+3165  06e7 4b20          	push	#32
+3166  06e9 ae5014        	ldw	x,#20500
+3167  06ec cd0000        	call	_GPIO_Init
+3169  06ef 85            	popw	x
+3170                     ; 452     initKeypad();
+3172  06f0 cd0103        	call	_initKeypad
+3174                     ; 453     buzzerInit();
+3176  06f3 cd0321        	call	_buzzerInit
+3178                     ; 454     init_milis();
+3180  06f6 cd0000        	call	_init_milis
+3182                     ; 456     for (i = 0; i < 4; i++) {
+3184  06f9 0f14          	clr	(OFST+0,sp)
+3186  06fb               L1231:
+3187                     ; 457         tm_displayCharacter(i, 0x00);
+3189  06fb 7b14          	ld	a,(OFST+0,sp)
+3190  06fd 5f            	clrw	x
+3191  06fe 95            	ld	xh,a
+3192  06ff cd00be        	call	_tm_displayCharacter
+3194                     ; 456     for (i = 0; i < 4; i++) {
+3196  0702 0c14          	inc	(OFST+0,sp)
+3200  0704 7b14          	ld	a,(OFST+0,sp)
+3201  0706 a104          	cp	a,#4
+3202  0708 25f1          	jrult	L1231
+3203                     ; 460     loadPINfromEEPROM();
+3205  070a cd04a7        	call	_loadPINfromEEPROM
+3207  070d               L7231:
+3208                     ; 463         key = getKey();
+3210  070d cd013b        	call	_getKey
+3212  0710 6b0e          	ld	(OFST-6,sp),a
+3214                     ; 467         if (GPIO_ReadInputPin(GPIOE, GPIO_PIN_4) == RESET) {
+3216  0712 4b10          	push	#16
+3217  0714 ae5014        	ldw	x,#20500
+3218  0717 cd0000        	call	_GPIO_ReadInputPin
+3220  071a 5b01          	addw	sp,#1
+3221  071c 4d            	tnz	a
+3222  071d 2634          	jrne	L3331
+3223                     ; 468             factoryResetPIN();
+3225  071f cd05a6        	call	_factoryResetPIN
+3228  0722               L7331:
+3229                     ; 469             while (GPIO_ReadInputPin(GPIOE, GPIO_PIN_4) == RESET);
+3231  0722 4b10          	push	#16
+3232  0724 ae5014        	ldw	x,#20500
+3233  0727 cd0000        	call	_GPIO_ReadInputPin
+3235  072a 5b01          	addw	sp,#1
+3236  072c 4d            	tnz	a
+3237  072d 27f3          	jreq	L7331
+3238                     ; 470             index = 0;
+3240  072f 0f13          	clr	(OFST-1,sp)
+3242                     ; 471             for (i = 0; i < 4; i++) {
+3244  0731 0f14          	clr	(OFST+0,sp)
+3246  0733               L3431:
+3247                     ; 472                 userInput[i] = ' ';
+3249  0733 96            	ldw	x,sp
+3250  0734 1c000f        	addw	x,#OFST-5
+3251  0737 9f            	ld	a,xl
+3252  0738 5e            	swapw	x
+3253  0739 1b14          	add	a,(OFST+0,sp)
+3254  073b 2401          	jrnc	L051
+3255  073d 5c            	incw	x
+3256  073e               L051:
+3257  073e 02            	rlwa	x,a
+3258  073f a620          	ld	a,#32
+3259  0741 f7            	ld	(x),a
+3260                     ; 473                 tm_displayCharacter(i, 0x00);
+3262  0742 7b14          	ld	a,(OFST+0,sp)
+3263  0744 5f            	clrw	x
+3264  0745 95            	ld	xh,a
+3265  0746 cd00be        	call	_tm_displayCharacter
+3267                     ; 471             for (i = 0; i < 4; i++) {
+3269  0749 0c14          	inc	(OFST+0,sp)
+3273  074b 7b14          	ld	a,(OFST+0,sp)
+3274  074d a104          	cp	a,#4
+3275  074f 25e2          	jrult	L3431
+3276                     ; 475             loggedIn = 0;
+3278  0751 0f0d          	clr	(OFST-7,sp)
+3280  0753               L3331:
+3281                     ; 479 					if (loggedIn) {
+3283  0753 0d0d          	tnz	(OFST-7,sp)
+3284  0755 274b          	jreq	L1531
+3285                     ; 480 							uint32_t now = milis();
+3287  0757 cd0000        	call	_milis
+3289  075a cd0000        	call	c_uitolx
+3291  075d 96            	ldw	x,sp
+3292  075e 1c0001        	addw	x,#OFST-19
+3293  0761 cd0000        	call	c_rtol
+3296                     ; 481 							if ((now - loginStartTime) >= LOGIN_TIMEOUT_MS) {
+3298  0764 96            	ldw	x,sp
+3299  0765 1c0001        	addw	x,#OFST-19
+3300  0768 cd0000        	call	c_ltor
+3302  076b 96            	ldw	x,sp
+3303  076c 1c0009        	addw	x,#OFST-11
+3304  076f cd0000        	call	c_lsub
+3306  0772 96            	ldw	x,sp
+3307  0773 1c0005        	addw	x,#OFST-15
+3308  0776 cd0000        	call	c_lcmp
+3310  0779 2527          	jrult	L1531
+3311                     ; 482 									logoutSignal();
+3313  077b cd060e        	call	_logoutSignal
+3315                     ; 484 									loggedIn = 0;
+3317  077e 0f0d          	clr	(OFST-7,sp)
+3319                     ; 485 									index = 0;
+3321  0780 0f13          	clr	(OFST-1,sp)
+3323                     ; 486 									for ( i = 0; i < 4; i++) {
+3325  0782 0f14          	clr	(OFST+0,sp)
+3327  0784               L5531:
+3328                     ; 487 											userInput[i] = ' ';
+3330  0784 96            	ldw	x,sp
+3331  0785 1c000f        	addw	x,#OFST-5
+3332  0788 9f            	ld	a,xl
+3333  0789 5e            	swapw	x
+3334  078a 1b14          	add	a,(OFST+0,sp)
+3335  078c 2401          	jrnc	L251
+3336  078e 5c            	incw	x
+3337  078f               L251:
+3338  078f 02            	rlwa	x,a
+3339  0790 a620          	ld	a,#32
+3340  0792 f7            	ld	(x),a
+3341                     ; 488 											tm_displayCharacter(i, 0x00);
+3343  0793 7b14          	ld	a,(OFST+0,sp)
+3344  0795 5f            	clrw	x
+3345  0796 95            	ld	xh,a
+3346  0797 cd00be        	call	_tm_displayCharacter
+3348                     ; 486 									for ( i = 0; i < 4; i++) {
+3350  079a 0c14          	inc	(OFST+0,sp)
+3354  079c 7b14          	ld	a,(OFST+0,sp)
+3355  079e a104          	cp	a,#4
+3356  07a0 25e2          	jrult	L5531
+3357  07a2               L1531:
+3358                     ; 493         if (key != 0) {
+3360  07a2 0d0e          	tnz	(OFST-6,sp)
+3361  07a4 2603          	jrne	L661
+3362  07a6 cc070d        	jp	L7231
+3363  07a9               L661:
+3364                     ; 494             if (key >= '0' && key <= '9') {
+3366  07a9 7b0e          	ld	a,(OFST-6,sp)
+3367  07ab a130          	cp	a,#48
+3368  07ad 2403          	jruge	L071
+3369  07af cc0853        	jp	L5631
+3370  07b2               L071:
+3372  07b2 7b0e          	ld	a,(OFST-6,sp)
+3373  07b4 a13a          	cp	a,#58
+3374  07b6 2503          	jrult	L271
+3375  07b8 cc0853        	jp	L5631
+3376  07bb               L271:
+3377                     ; 495                 if (index < 4) {
+3379  07bb 7b13          	ld	a,(OFST-1,sp)
+3380  07bd a104          	cp	a,#4
+3381  07bf 2503          	jrult	L471
+3382  07c1 cc070d        	jp	L7231
+3383  07c4               L471:
+3384                     ; 496                     userInput[index] = key;
+3386  07c4 96            	ldw	x,sp
+3387  07c5 1c000f        	addw	x,#OFST-5
+3388  07c8 9f            	ld	a,xl
+3389  07c9 5e            	swapw	x
+3390  07ca 1b13          	add	a,(OFST-1,sp)
+3391  07cc 2401          	jrnc	L451
+3392  07ce 5c            	incw	x
+3393  07cf               L451:
+3394  07cf 02            	rlwa	x,a
+3395  07d0 7b0e          	ld	a,(OFST-6,sp)
+3396  07d2 f7            	ld	(x),a
+3397                     ; 497                     tm_displayCharacter(index, digitToSegment[key - '0']);
+3399  07d3 7b0e          	ld	a,(OFST-6,sp)
+3400  07d5 5f            	clrw	x
+3401  07d6 97            	ld	xl,a
+3402  07d7 1d0030        	subw	x,#48
+3403  07da d60004        	ld	a,(_digitToSegment,x)
+3404  07dd 97            	ld	xl,a
+3405  07de 7b13          	ld	a,(OFST-1,sp)
+3406  07e0 95            	ld	xh,a
+3407  07e1 cd00be        	call	_tm_displayCharacter
+3409                     ; 498                     index++;
+3411  07e4 0c13          	inc	(OFST-1,sp)
+3413                     ; 500                     if (index == 4) {
+3415  07e6 7b13          	ld	a,(OFST-1,sp)
+3416  07e8 a104          	cp	a,#4
+3417  07ea 2703          	jreq	L671
+3418  07ec cc070d        	jp	L7231
+3419  07ef               L671:
+3420                     ; 502                         if (!loggedIn) {
+3422  07ef 0d0d          	tnz	(OFST-7,sp)
+3423  07f1 2703          	jreq	L002
+3424  07f3 cc070d        	jp	L7231
+3425  07f6               L002:
+3426                     ; 504                             if (comparePIN(userInput, storedPIN)) {
+3428  07f6 ae0000        	ldw	x,#_storedPIN
+3429  07f9 89            	pushw	x
+3430  07fa 96            	ldw	x,sp
+3431  07fb 1c0011        	addw	x,#OFST-3
+3432  07fe cd053c        	call	_comparePIN
+3434  0801 85            	popw	x
+3435  0802 4d            	tnz	a
+3436  0803 2716          	jreq	L5731
+3437                     ; 505 																beepSuccess();
+3439  0805 cd0421        	call	_beepSuccess
+3441                     ; 506 																loggedIn = 1;
+3443  0808 a601          	ld	a,#1
+3444  080a 6b0d          	ld	(OFST-7,sp),a
+3446                     ; 507                                 loginStartTime = milis();
+3448  080c cd0000        	call	_milis
+3450  080f cd0000        	call	c_uitolx
+3452  0812 96            	ldw	x,sp
+3453  0813 1c0009        	addw	x,#OFST-11
+3454  0816 cd0000        	call	c_rtol
+3458  0819 2012          	jra	L7731
+3459  081b               L5731:
+3460                     ; 509                                 beepFail();
+3462  081b cd0479        	call	_beepFail
+3464                     ; 510 																blinkLED(1, 'r');
+3466  081e ae0172        	ldw	x,#370
+3467  0821 cd05b4        	call	_blinkLED
+3469                     ; 511 																beepFail();
+3471  0824 cd0479        	call	_beepFail
+3473                     ; 512 																blinkLED(1, 'r');
+3475  0827 ae0172        	ldw	x,#370
+3476  082a cd05b4        	call	_blinkLED
+3478  082d               L7731:
+3479                     ; 515                             index = 0;
+3481  082d 0f13          	clr	(OFST-1,sp)
+3483                     ; 516                             for (j = 0; j < 4; j++) {
+3485  082f 0f14          	clr	(OFST+0,sp)
+3487  0831               L1041:
+3488                     ; 517                                 userInput[j] = ' ';
+3490  0831 96            	ldw	x,sp
+3491  0832 1c000f        	addw	x,#OFST-5
+3492  0835 9f            	ld	a,xl
+3493  0836 5e            	swapw	x
+3494  0837 1b14          	add	a,(OFST+0,sp)
+3495  0839 2401          	jrnc	L651
+3496  083b 5c            	incw	x
+3497  083c               L651:
+3498  083c 02            	rlwa	x,a
+3499  083d a620          	ld	a,#32
+3500  083f f7            	ld	(x),a
+3501                     ; 518                                 tm_displayCharacter(j, 0x00);
+3503  0840 7b14          	ld	a,(OFST+0,sp)
+3504  0842 5f            	clrw	x
+3505  0843 95            	ld	xh,a
+3506  0844 cd00be        	call	_tm_displayCharacter
+3508                     ; 516                             for (j = 0; j < 4; j++) {
+3510  0847 0c14          	inc	(OFST+0,sp)
+3514  0849 7b14          	ld	a,(OFST+0,sp)
+3515  084b a104          	cp	a,#4
+3516  084d 25e2          	jrult	L1041
+3517  084f ac0d070d      	jpf	L7231
+3518  0853               L5631:
+3519                     ; 523             } else if (key == '*') {
+3521  0853 7b0e          	ld	a,(OFST-6,sp)
+3522  0855 a12a          	cp	a,#42
+3523  0857 2623          	jrne	L1141
+3524                     ; 525                 if (index > 0) {
+3526  0859 0d13          	tnz	(OFST-1,sp)
+3527  085b 2603          	jrne	L202
+3528  085d cc070d        	jp	L7231
+3529  0860               L202:
+3530                     ; 526                     index--;
+3532  0860 0a13          	dec	(OFST-1,sp)
+3534                     ; 527                     userInput[index] = ' ';
+3536  0862 96            	ldw	x,sp
+3537  0863 1c000f        	addw	x,#OFST-5
+3538  0866 9f            	ld	a,xl
+3539  0867 5e            	swapw	x
+3540  0868 1b13          	add	a,(OFST-1,sp)
+3541  086a 2401          	jrnc	L061
+3542  086c 5c            	incw	x
+3543  086d               L061:
+3544  086d 02            	rlwa	x,a
+3545  086e a620          	ld	a,#32
+3546  0870 f7            	ld	(x),a
+3547                     ; 528                     tm_displayCharacter(index, 0x00);
+3549  0871 7b13          	ld	a,(OFST-1,sp)
+3550  0873 5f            	clrw	x
+3551  0874 95            	ld	xh,a
+3552  0875 cd00be        	call	_tm_displayCharacter
+3554  0878 ac0d070d      	jpf	L7231
+3555  087c               L1141:
+3556                     ; 530             } else if (key == '#') {
+3558  087c 7b0e          	ld	a,(OFST-6,sp)
+3559  087e a123          	cp	a,#35
+3560  0880 2703          	jreq	L402
+3561  0882 cc070d        	jp	L7231
+3562  0885               L402:
+3563                     ; 532                 if (loggedIn && index == 4) {
+3565  0885 0d0d          	tnz	(OFST-7,sp)
+3566  0887 2603          	jrne	L602
+3567  0889 cc070d        	jp	L7231
+3568  088c               L602:
+3570  088c 7b13          	ld	a,(OFST-1,sp)
+3571  088e a104          	cp	a,#4
+3572  0890 2703          	jreq	L012
+3573  0892 cc070d        	jp	L7231
+3574  0895               L012:
+3575                     ; 533                     savePINtoEEPROM(userInput);
+3577  0895 96            	ldw	x,sp
+3578  0896 1c000f        	addw	x,#OFST-5
+3579  0899 cd0508        	call	_savePINtoEEPROM
+3581                     ; 534                     blinkDisplay(2);  
+3583  089c a602          	ld	a,#2
+3584  089e cd0565        	call	_blinkDisplay
+3586                     ; 537                     for (j = 0; j < 4; j++) {
+3588  08a1 0f14          	clr	(OFST+0,sp)
+3590  08a3               L3241:
+3591                     ; 538                         storedPIN[j] = userInput[j];
+3593  08a3 7b14          	ld	a,(OFST+0,sp)
+3594  08a5 5f            	clrw	x
+3595  08a6 97            	ld	xl,a
+3596  08a7 89            	pushw	x
+3597  08a8 96            	ldw	x,sp
+3598  08a9 1c0011        	addw	x,#OFST-3
+3599  08ac 9f            	ld	a,xl
+3600  08ad 5e            	swapw	x
+3601  08ae 1b16          	add	a,(OFST+2,sp)
+3602  08b0 2401          	jrnc	L261
+3603  08b2 5c            	incw	x
+3604  08b3               L261:
+3605  08b3 02            	rlwa	x,a
+3606  08b4 f6            	ld	a,(x)
+3607  08b5 85            	popw	x
+3608  08b6 e700          	ld	(_storedPIN,x),a
+3609                     ; 537                     for (j = 0; j < 4; j++) {
+3611  08b8 0c14          	inc	(OFST+0,sp)
+3615  08ba 7b14          	ld	a,(OFST+0,sp)
+3616  08bc a104          	cp	a,#4
+3617  08be 25e3          	jrult	L3241
+3618                     ; 542                     loggedIn = 0;
+3620  08c0 0f0d          	clr	(OFST-7,sp)
+3622                     ; 543                     index = 0;
+3624  08c2 0f13          	clr	(OFST-1,sp)
+3626                     ; 544 										blinkLED(2, '');
+3628  08c4 ae0200        	ldw	x,#512
+3629  08c7 cd05b4        	call	_blinkLED
+3631                     ; 545                     for (j = 0; j < 4; j++) {
+3633  08ca 0f14          	clr	(OFST+0,sp)
+3635  08cc               L1341:
+3636                     ; 546                         userInput[j] = ' ';
+3638  08cc 96            	ldw	x,sp
+3639  08cd 1c000f        	addw	x,#OFST-5
+3640  08d0 9f            	ld	a,xl
+3641  08d1 5e            	swapw	x
+3642  08d2 1b14          	add	a,(OFST+0,sp)
+3643  08d4 2401          	jrnc	L461
+3644  08d6 5c            	incw	x
+3645  08d7               L461:
+3646  08d7 02            	rlwa	x,a
+3647  08d8 a620          	ld	a,#32
+3648  08da f7            	ld	(x),a
+3649                     ; 547                         tm_displayCharacter(j, 0x00);
+3651  08db 7b14          	ld	a,(OFST+0,sp)
+3652  08dd 5f            	clrw	x
+3653  08de 95            	ld	xh,a
+3654  08df cd00be        	call	_tm_displayCharacter
+3656                     ; 545                     for (j = 0; j < 4; j++) {
+3658  08e2 0c14          	inc	(OFST+0,sp)
+3662  08e4 7b14          	ld	a,(OFST+0,sp)
+3663  08e6 a104          	cp	a,#4
+3664  08e8 25e2          	jrult	L1341
+3665  08ea ac0d070d      	jpf	L7231
+3700                     ; 560 void assert_failed(uint8_t* file, uint32_t line) {
+3701                     	switch	.text
+3702  08ee               _assert_failed:
+3706  08ee               L5541:
+3707                     ; 561     while (1);
+3709  08ee 20fe          	jra	L5541
+3754                     	xdef	_main
+3755                     	xdef	_logoutSignal
+3756                     	xdef	_factoryResetPIN
+3757                     	xdef	_blinkDisplay
+3758                     	xdef	_comparePIN
+3759                     	xdef	_savePINtoEEPROM
+3760                     	xdef	_loadPINfromEEPROM
+3761                     	xdef	_EEPROM_WriteByte
+3762                     	xdef	_EEPROM_ReadByte
+3763                     	xdef	_digitToSegment
+3764                     	xdef	_beepAndBlink
+3765                     	xdef	_blinkLED
+3766                     	xdef	_beepTone
+3767                     	xdef	_beepFail
+3768                     	xdef	_beepSuccess
+3769                     	xdef	_buzzerInit
+3770                     	xdef	_getKey
+3771                     	xdef	_initKeypad
+3772                     	xdef	_delay_us
+3773                     	xdef	_tm_displayCharacter
+3774                     	xdef	_tm_writeByte
+3775                     	xdef	_tm_stop
+3776                     	xdef	_tm_start
+3777                     	xdef	_setCLK
+3778                     	xdef	_setDIO
+3779                     	switch	.ubsct
+3780  0000               _storedPIN:
+3781  0000 00000000      	ds.b	4
+3782                     	xdef	_storedPIN
+3783                     	xdef	_defaultPIN
+3784                     	xref	_init_milis
+3785                     	xref	_delay_ms
+3786                     	xref	_milis
+3787                     	xdef	_assert_failed
+3788                     	xref	_GPIO_ReadInputPin
+3789                     	xref	_GPIO_WriteLow
+3790                     	xref	_GPIO_WriteHigh
+3791                     	xref	_GPIO_Init
+3792                     	xref	_FLASH_ProgramByte
+3793                     	xref	_FLASH_Lock
+3794                     	xref	_FLASH_Unlock
+3795                     	xref	_CLK_HSIPrescalerConfig
+3796                     	xref.b	c_lreg
+3797                     	xref.b	c_x
+3798                     	xref.b	c_y
+3818                     	xref	c_lsub
+3819                     	xref	c_ludv
+3820                     	xref	c_umul
+3821                     	xref	c_ldiv
+3822                     	xref	c_rtol
+3823                     	xref	c_uitolx
+3824                     	xref	c_bmulx
+3825                     	xref	c_lcmp
+3826                     	xref	c_ltor
+3827                     	xref	c_lgadc
+3828                     	xref	c_xymov
+3829                     	end

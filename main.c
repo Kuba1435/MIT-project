@@ -29,6 +29,10 @@ void beepSuccess(void);
 void beepFail(void);
 void beepTone(uint16_t freq, uint16_t duration_ms);
 
+//LED
+void blinkLED(uint8_t times, char color);
+void beepAndBlink(uint16_t frequency, uint16_t duration_ms, GPIO_TypeDef* port, GPIO_Pin_TypeDef pin);
+
 // --- Segmentový kód ---
 const uint8_t digitToSegment[] = {
     0x3F, // 0
@@ -260,13 +264,46 @@ void beepTone(uint16_t freq, uint16_t duration_ms) {
     }
 }
 
+void beepAndBlink(uint16_t frequency, uint16_t duration_ms, GPIO_TypeDef* port, GPIO_Pin_TypeDef pin) {
+    uint16_t halfPeriod_us = 1000000UL / (2 * frequency);  // délka pùl periody v µs
+    uint32_t startTime = milis();
+
+    while ((milis() - startTime) < duration_ms) {
+        beepTone(2000,400);
+        blinkLED(1, '');            
+        delay_us(halfPeriod_us);
+    }
+}
+
+
+// Funkce, ktera paralelne blika a prehrava success ton po prihlaseni
 void beepSuccess(void) {
-    beepTone(1000, 100);
+    uint16_t freq = 3000;
+    uint16_t totalDuration = 300;  
+    uint16_t chunkDuration = 50;   
+    uint16_t elapsed = 0;
+    uint8_t ledOn = 0;
+
+    while (elapsed < totalDuration) {
+        if (ledOn) {
+            GPIO_WriteLow(GPIOE, GPIO_PIN_5);
+            ledOn = 0;
+        } else {
+            GPIO_WriteHigh(GPIOE, GPIO_PIN_5);
+            ledOn = 1;
+        }
+
+        // Zahraj krátký tón (blokuje na chunkDuration ms)
+        beepTone(freq, chunkDuration);
+
+        elapsed += chunkDuration;
+    }
+
+    // Na konci vypni LED
+    GPIO_WriteLow(GPIOC, GPIO_PIN_4);
 }
 
 void beepFail(void) {
-    beepTone(500, 100);
-    delay_us(100000);
     beepTone(500, 100);
 }
 
@@ -326,13 +363,11 @@ uint8_t comparePIN(const char* a, const char* b) {
 void blinkDisplay(uint8_t times) {
     uint8_t i, j;
     for (i = 0; i < times; i++) {
-        // Zapnout vše (všechny 4 pozice na '8')
         for (j = 0; j < 4; j++) {
-            tm_displayCharacter(j, 0x7F); // 0x7F = všechny segmenty ON
+            tm_displayCharacter(j, 0x7F); 
         }
-        delay_us(300000);  // ~300 ms (potøebuješ delší delay, mùžeš upravit)
+        delay_us(300000); 
         
-        // Vypnout vše (všechny 4 pozice prázdné)
         for (j = 0; j < 4; j++) {
             tm_displayCharacter(j, 0x00);
         }
@@ -345,7 +380,53 @@ void blinkDisplay(uint8_t times) {
 void factoryResetPIN(void) {
     savePINtoEEPROM(defaultPIN);
     beepSuccess();
-    blinkDisplay(2); // blikni 2x po resetu
+    blinkDisplay(2); 
+}
+
+void blinkLED(uint8_t times, char color){
+	    uint8_t i;
+			if (color == 'r'){
+				for (i = 0; i < times; i++) {
+					GPIO_WriteHigh(GPIOC, GPIO_PIN_4); 
+					delay_ms(250);
+					GPIO_WriteLow(GPIOC, GPIO_PIN_4);  
+				}
+			}
+			else{
+					for (i = 0; i < times; i++) {
+						GPIO_WriteHigh(GPIOE, GPIO_PIN_5);
+						delay_ms(500);
+						GPIO_WriteLow(GPIOE, GPIO_PIN_5);
+						delay_ms(500);
+				}
+			}
+
+}
+
+
+void logoutSignal(void) {
+    uint8_t i;
+    uint8_t j;
+    uint8_t k;
+
+    for (i = 0; i < 2; i++) {
+        beepTone(1000, 100);
+        delay_ms(100);
+    }
+
+    for (i = 0; i < 2; i++) {
+        GPIO_WriteHigh(GPIOC, GPIO_PIN_4);
+        delay_ms(200);
+        GPIO_WriteLow(GPIOC, GPIO_PIN_4);
+        delay_ms(200);
+    }
+
+    for (k = 0; k < 2; k++) {
+        for (j = 0; j < 4; j++) tm_displayCharacter(j, 0xFF);
+        delay_ms(200);
+        for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
+        delay_ms(200);
+    }
 }
 
 
@@ -363,6 +444,10 @@ void main(void) {
     GPIO_Init(TM_CLK_PORT, TM_CLK_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
     GPIO_Init(TM_DIO_PORT, TM_DIO_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
     GPIO_Init(GPIOE, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
+		
+		// LED PIN init
+		GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_OUT_PP_LOW_FAST); // èervená LED
+		GPIO_Init(GPIOE, GPIO_PIN_5, GPIO_MODE_OUT_PP_LOW_FAST); // zelená LED
 
     initKeypad();
     buzzerInit();
@@ -377,6 +462,7 @@ void main(void) {
     while (1) {
         key = getKey();
 
+
         // Tlaèítko factory reset
         if (GPIO_ReadInputPin(GPIOE, GPIO_PIN_4) == RESET) {
             factoryResetPIN();
@@ -389,26 +475,20 @@ void main(void) {
             loggedIn = 0;
         }
 
-        // Timeout automatického odhlášení
-        if (loggedIn) {
-            uint32_t now = milis();
-            if ((now - loginStartTime) >= LOGIN_TIMEOUT_MS) {
-                // Odhlášení
-                beepTone(1000, 500);  // dlouhý tón 500ms
-                for (k = 0; k < 2; k++) {
-                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0xFF);
-                    delay_ms(200);
-                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
-                    delay_ms(200);
-                }
-                loggedIn = 0;
-                index = 0;
-                for (i = 0; i < 4; i++) {
-                    userInput[i] = ' ';
-                    tm_displayCharacter(i, 0x00);
-                }
-            }
-        }
+        // Automatického odhlášení
+					if (loggedIn) {
+							uint32_t now = milis();
+							if ((now - loginStartTime) >= LOGIN_TIMEOUT_MS) {
+									logoutSignal();
+					
+									loggedIn = 0;
+									index = 0;
+									for ( i = 0; i < 4; i++) {
+											userInput[i] = ' ';
+											tm_displayCharacter(i, 0x00);
+									}
+							}
+					}
 
         if (key != 0) {
             if (key >= '0' && key <= '9') {
@@ -418,22 +498,20 @@ void main(void) {
                     index++;
 
                     if (index == 4) {
-                        // Po zadání 4 èíslic zkontroluj PIN (pokud není pøihlášen)
+
                         if (!loggedIn) {
+													
                             if (comparePIN(userInput, storedPIN)) {
-                                beepSuccess();
-                                for (k = 0; k < 2; k++) {
-                                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x7F);
-                                    delay_ms(200);
-                                    for (j = 0; j < 4; j++) tm_displayCharacter(j, 0x00);
-                                    delay_ms(200);
-                                }
-                                loggedIn = 1;
+																beepSuccess();
+																loggedIn = 1;
                                 loginStartTime = milis();
                             } else {
                                 beepFail();
+																blinkLED(1, 'r');
+																beepFail();
+																blinkLED(1, 'r');
                             }
-                            // Vymazání vstupu vždy po kontrole
+
                             index = 0;
                             for (j = 0; j < 4; j++) {
                                 userInput[j] = ' ';
@@ -453,9 +531,8 @@ void main(void) {
                 // Pokud je pøihlášený a zadá 4 èíslice, mùže zmìnit PIN
                 if (loggedIn && index == 4) {
                     savePINtoEEPROM(userInput);
-                    beepSuccess();
-                    blinkDisplay(2);  // blikni displej 2x
-
+                    blinkDisplay(2);  
+										
                     // Aktualizovat uložený PIN v RAM
                     for (j = 0; j < 4; j++) {
                         storedPIN[j] = userInput[j];
@@ -464,6 +541,7 @@ void main(void) {
                     // Ihned odhlásit uživatele po zmìnì PINu
                     loggedIn = 0;
                     index = 0;
+										blinkLED(1, '');
                     for (j = 0; j < 4; j++) {
                         userInput[j] = ' ';
                         tm_displayCharacter(j, 0x00);
