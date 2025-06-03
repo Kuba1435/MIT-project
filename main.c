@@ -1,13 +1,15 @@
 #include "stm8s.h"
 #include "milis.h"
 
+
 // Adresa EEPROM, kde bude uložen PIN (4 bajty)
 #define EEPROM_PIN_ADDR 0x4000
 
 // Výchozí PIN - pøi prvním spuštìní nebo pokud v EEPROM není uložen správný PIN
 const char defaultPIN[4] = {'1', '2', '3', '4'};
 
-char storedPIN[4];   // PIN naètený z EEPROM
+// PIN naètený z EEPROM
+char storedPIN[4];  
 
 
 // --- TM1637 ---
@@ -19,9 +21,11 @@ void tm_writeByte(uint8_t b);
 void tm_displayCharacter(uint8_t pos, uint8_t character);
 void delay_us(uint16_t microseconds);
 
+
 // --- Klávesnice ---
 void initKeypad(void);
 char getKey(void);
+
 
 // --- Bzuèák ---
 void buzzerInit(void);
@@ -29,9 +33,11 @@ void beepSuccess(void);
 void beepFail(void);
 void beepTone(uint16_t freq, uint16_t duration_ms);
 
+
 //LED
 void blinkLED(uint8_t times, char color);
 void beepAndBlink(uint16_t frequency, uint16_t duration_ms, GPIO_TypeDef* port, GPIO_Pin_TypeDef pin);
+
 
 // --- Segmentový kód ---
 const uint8_t digitToSegment[] = {
@@ -46,11 +52,14 @@ const uint8_t digitToSegment[] = {
     0x7F, // 8
     0x6F  // 9
 };
+
+
 // --- PINY TM1637 ---
 #define TM_CLK_PORT  GPIOB
 #define TM_CLK_PIN   GPIO_PIN_5
 #define TM_DIO_PORT  GPIOB
 #define TM_DIO_PIN   GPIO_PIN_4
+
 
 // --- PINY KLÁVESNICE ---
 #define ROW1_PIN GPIO_PIN_6  // PD6
@@ -62,12 +71,10 @@ const uint8_t digitToSegment[] = {
 #define COL2_PIN GPIO_PIN_2  // PC2
 #define COL3_PIN GPIO_PIN_3  // PC3
 
+
 // --- Bzuèák na PD3 ---
 #define BUZZER_PORT GPIOD
 #define BUZZER_PIN  GPIO_PIN_3
-
-
-
 
 
 
@@ -80,6 +87,7 @@ void setCLK(uint8_t state) {
     if (state) GPIO_WriteHigh(TM_CLK_PORT, TM_CLK_PIN);
     else GPIO_WriteLow(TM_CLK_PORT, TM_CLK_PIN);
 }
+
 
 void tm_start(void) {
     setCLK(1);
@@ -123,11 +131,11 @@ void tm_writeByte(uint8_t b) {
 
 void tm_displayCharacter(uint8_t pos, uint8_t character) {
     tm_start();
-    tm_writeByte(0x40); // auto-increment mode
+    tm_writeByte(0x40); 
     tm_stop();
 
     tm_start();
-    tm_writeByte(0xC0 | pos); // start address + position
+    tm_writeByte(0xC0 | pos); 
     tm_writeByte(character);
     tm_stop();
 
@@ -264,16 +272,6 @@ void beepTone(uint16_t freq, uint16_t duration_ms) {
     }
 }
 
-void beepAndBlink(uint16_t frequency, uint16_t duration_ms, GPIO_TypeDef* port, GPIO_Pin_TypeDef pin) {
-    uint16_t halfPeriod_us = 1000000UL / (2 * frequency);  // délka pùl periody v µs
-    uint32_t startTime = milis();
-
-    while ((milis() - startTime) < duration_ms) {
-        beepTone(2000,400);
-        blinkLED(1, '');            
-        delay_us(halfPeriod_us);
-    }
-}
 
 
 // Funkce, ktera paralelne blika a prehrava success ton po prihlaseni
@@ -293,15 +291,14 @@ void beepSuccess(void) {
             ledOn = 1;
         }
 
-        // Zahraj krátký tón (blokuje na chunkDuration ms)
         beepTone(freq, chunkDuration);
 
         elapsed += chunkDuration;
     }
 
-    // Na konci vypni LED
     GPIO_WriteLow(GPIOC, GPIO_PIN_4);
 }
+
 
 void beepFail(void) {
     beepTone(500, 100);
@@ -490,6 +487,7 @@ void main(void) {
 							}
 					}
 
+				// Kontrola zmacknute klavesy a overeni pinu
         if (key != 0) {
             if (key >= '0' && key <= '9') {
                 if (index < 4) {
@@ -497,10 +495,12 @@ void main(void) {
                     tm_displayCharacter(index, digitToSegment[key - '0']);
                     index++;
 
+										// cekat na userinput 4 cislic
                     if (index == 4) {
-
+											
+												// pokud neni prihlasen overit pin
                         if (!loggedIn) {
-													
+
                             if (comparePIN(userInput, storedPIN)) {
 																beepSuccess();
 																loggedIn = 1;
@@ -511,7 +511,8 @@ void main(void) {
 																beepFail();
 																blinkLED(1, 'r');
                             }
-
+														
+														// vymazani user inputu
                             index = 0;
                             for (j = 0; j < 4; j++) {
                                 userInput[j] = ' ';
@@ -528,7 +529,7 @@ void main(void) {
                     tm_displayCharacter(index, 0x00);
                 }
             } else if (key == '#') {
-                // Pokud je pøihlášený a zadá 4 èíslice, mùže zmìnit PIN
+                // Pokud je pøihlášený a zadá 4 èíslice, mùže zmìnit PIN po stisknuti #
                 if (loggedIn && index == 4) {
                     savePINtoEEPROM(userInput);
                     blinkDisplay(2);  
@@ -538,7 +539,7 @@ void main(void) {
                         storedPIN[j] = userInput[j];
                     }
 
-                    // Ihned odhlásit uživatele po zmìnì PINu
+                    // Ihned odhlásit uživatele po zmìnì PINu -> safety future
                     loggedIn = 0;
                     index = 0;
 										blinkLED(1, '');
