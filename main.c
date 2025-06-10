@@ -301,7 +301,9 @@ void beepSuccess(void) {
 
 
 void beepFail(void) {
-    beepTone(500, 100);
+    beepTone(600, 100);  
+    delay_ms(50);
+    beepTone(600, 100);  
 }
 
 // --- Funkce pro EEPROM ---
@@ -445,6 +447,11 @@ void main(void) {
 		// LED PIN init
 		GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_OUT_PP_LOW_FAST); // èervená LED
 		GPIO_Init(GPIOE, GPIO_PIN_5, GPIO_MODE_OUT_PP_LOW_FAST); // zelená LED
+		
+		
+		// EXTERNAL DEVICE
+		GPIO_Init(GPIOD, GPIO_PIN_4, GPIO_MODE_OUT_PP_LOW_FAST);//PD4
+		GPIO_WriteLow(GPIOD, GPIO_PIN_4); 
 
     initKeypad();
     buzzerInit();
@@ -484,6 +491,7 @@ void main(void) {
 											userInput[i] = ' ';
 											tm_displayCharacter(i, 0x00);
 									}
+									GPIO_WriteLow(GPIOD, GPIO_PIN_4);
 							}
 					}
 
@@ -505,10 +513,9 @@ void main(void) {
 																beepSuccess();
 																loggedIn = 1;
                                 loginStartTime = milis();
+																GPIO_WriteHigh(GPIOD, GPIO_PIN_4);
                             } else {
                                 beepFail();
-																blinkLED(1, 'r');
-																beepFail();
 																blinkLED(1, 'r');
                             }
 														
@@ -547,6 +554,7 @@ void main(void) {
                         userInput[j] = ' ';
                         tm_displayCharacter(j, 0x00);
                     }
+										GPIO_WriteLow(GPIOD, GPIO_PIN_4);
                 }
             }
         }
